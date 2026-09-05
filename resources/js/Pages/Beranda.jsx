@@ -1,24 +1,27 @@
-import BeritaArtikel from "@/Components/Elements/BeritaArtikel";
-import HeroYayasan from "@/Components/Elements/HeroYayasan";
-import HubungiKami from "@/Components/Elements/HubungiKami";
-import TentangYayasan from "@/Components/Elements/TentangYayasan";
+import React from "react";
+import { Head } from "@inertiajs/react";
 import Layout from "@/Layouts/Layout";
-import { Head, Link } from "@inertiajs/react";
+import HeroYayasan from "@/Components/Elements/HeroYayasan";
+import TentangYayasan from "@/Components/Elements/TentangYayasan";
+import StatistikDampak from "@/Components/Elements/StatistikDampak";
+import BeritaTerbaru from "@/Components/Elements/BeritaTerbaru";
 
-export default function Beranda() {
+export default function Beranda({ beritaList = [] }) {
     return (
         <>
-            <Head title="Beranda" />
+            <Head title="Beranda - Yayasan Bhakti Arumi Delangga (MTAS)" />
             <Layout>
+                {/* 1. Hero Banner Utama */}
+                <HeroYayasan />
 
-                <HeroYayasan/>
-                
-                <TentangYayasan/>
+                {/* 2. Profil Singkat & Dedikasi Yayasan */}
+                <TentangYayasan />
 
-                <BeritaArtikel/>
+                {/* 3. Statistik Dampak & Nilai Keunggulan Yayasan */}
+                <StatistikDampak />
 
-                <HubungiKami/>
-                
+                {/* 4. Kabar & Berita Terkini */}
+                <BeritaTerbaru beritaList={beritaList} />
             </Layout>
         </>
     );
