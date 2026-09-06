@@ -6,6 +6,7 @@ use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -28,7 +29,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -42,15 +43,40 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+        $loginInput = $this->input('email');
+        $password = $this->input('password');
+        $remember = $this->boolean('remember');
 
-            throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
-            ]);
+        // Determine if input is email or username
+        $fieldType = filter_var($loginInput, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        $credentials = [
+            $fieldType => $loginInput,
+            'password' => $password,
+        ];
+
+        if (! Auth::attempt($credentials, $remember)) {
+            // Fallback attempt: try email if username was assumed or vice versa
+            $altField = ($fieldType === 'email') ? 'username' : 'email';
+            $altCredentials = [
+                $altField => $loginInput,
+                'password' => $password,
+            ];
+
+            if (! Auth::attempt($altCredentials, $remember)) {
+                RateLimiter::hit($this->throttleKey());
+
+                Log::warning("Security Warning: Failed login attempt for input '{$loginInput}' from IP {$this->ip()}");
+
+                throw ValidationException::withMessages([
+                    'email' => 'Kredensial yang Anda masukkan tidak cocok dengan data kami.',
+                ]);
+            }
         }
 
         RateLimiter::clear($this->throttleKey());
+
+        Log::info("Security Audit: Successful login for user " . Auth::user()->email . " from IP {$this->ip()}");
     }
 
     /**
@@ -68,11 +94,10 @@ class LoginRequest extends FormRequest
 
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
+        Log::warning("Security Alert: Rate limit exceeded for login attempts from IP {$this->ip()}");
+
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
+            'email' => "Terlalu banyak percobaan login. Silakan coba lagi dalam {$seconds} detik.",
         ]);
     }
 
