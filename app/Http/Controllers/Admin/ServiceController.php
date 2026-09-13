@@ -31,27 +31,14 @@ class ServiceController extends Controller
     {
         $data = $request->except(['_token', '_method']);
 
-        $imageKeys = [
-            'hero_image',
-            'about_image1',
-            'about_image2',
-            'about_image3',
-            'about_image4',
-            'service1_image',
-            'service2_image',
-            'service3_image',
-        ];
-
-        // Process file uploads
-        foreach ($imageKeys as $imgKey) {
-            if ($request->hasFile($imgKey)) {
+        // Process any uploaded image file dynamically
+        foreach ($request->allFiles() as $fileKey => $file) {
+            if ($file && $file->isValid()) {
                 $request->validate([
-                    $imgKey => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:5120',
+                    $fileKey => 'nullable|image|mimes:jpeg,png,jpg,webp,svg,gif|max:10240',
                 ]);
-
-                $file = $request->file($imgKey);
                 $path = $file->store('settings', 'public');
-                $data[$imgKey] = '/storage/' . $path;
+                $data[$fileKey] = '/storage/' . $path;
             }
         }
 
@@ -59,22 +46,26 @@ class ServiceController extends Controller
         foreach ($data as $key => $val) {
             if ($val !== null) {
                 $group = 'general';
-                if (str_starts_with($key, 'hero_')) {
-                    $group = 'hero';
-                } elseif (str_starts_with($key, 'about_')) {
-                    $group = 'about';
-                } elseif (str_starts_with($key, 'service')) {
-                    $group = 'services';
+                if (str_starts_with($key, 'hero_') || str_starts_with($key, 'about_') || str_starts_with($key, 'stat') || str_starts_with($key, 'service') || str_starts_with($key, 'why_')) {
+                    $group = 'beranda';
+                } elseif (str_starts_with($key, 'maktab_')) {
+                    $group = 'maktabtuli';
+                } elseif (str_starts_with($key, 'berita_')) {
+                    $group = 'berita';
+                } elseif (str_starts_with($key, 'galeri_')) {
+                    $group = 'galeri';
                 } elseif (str_starts_with($key, 'contact_')) {
-                    $group = 'contact';
+                    $group = 'kontak';
+                } elseif (str_starts_with($key, 'footer_')) {
+                    $group = 'footer';
                 }
 
                 $type = 'text';
-                if (str_contains($key, 'desc') || str_contains($key, 'visi') || str_contains($key, 'misi') || str_contains($key, 'address')) {
+                if (str_contains($key, 'desc') || str_contains($key, 'visi') || str_contains($key, 'misi') || str_contains($key, 'address') || str_ends_with($key, '_a')) {
                     $type = 'textarea';
-                } elseif (in_array($key, $imageKeys)) {
+                } elseif (str_contains($key, 'image')) {
                     $type = 'image';
-                } elseif (str_contains($key, 'link') || str_contains($key, 'embed') || str_contains($key, 'instagram') || str_contains($key, 'tiktok') || str_contains($key, 'youtube') || str_contains($key, 'facebook')) {
+                } elseif (str_contains($key, 'link') || str_contains($key, 'url') || str_contains($key, 'embed') || str_contains($key, 'instagram') || str_contains($key, 'tiktok') || str_contains($key, 'youtube') || str_contains($key, 'facebook')) {
                     $type = 'link';
                 }
 
@@ -82,7 +73,7 @@ class ServiceController extends Controller
             }
         }
 
-        return redirect()->back()->with('success', 'Alhamdulillah! Konten tampilan dan pengaturan website berhasil diperbarui secara langsung.');
+        return redirect()->back()->with('success', 'Alhamdulillah! Pengaturan dan konten seluruh halaman website berhasil diperbarui.');
     }
 
     /**

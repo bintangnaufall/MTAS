@@ -20,6 +20,7 @@ use App\Http\Controllers\SantriController;
 use App\Http\Controllers\Admin\SantriController as AdminSantriController;
 use App\Http\Controllers\Admin\PendaftaranController as AdminPendaftaranController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
+use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
 
 // Route Halaman Utama & Profil Lembaga Publik
 Route::get('/', [BerandaController::class, 'index'])->name('beranda');
@@ -110,6 +111,12 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::post('/pengaturan-akun/preferensi', [AdminPengaturanAkunController::class, 'updatePreferences'])->name('admin.pengaturan-akun.preferensi');
     Route::delete('/pengaturan-akun/avatar', [AdminPengaturanAkunController::class, 'deleteAvatar'])->name('admin.pengaturan-akun.avatar.delete');
     Route::delete('/pengaturan-akun/session/{id}', [AdminPengaturanAkunController::class, 'destroySession'])->name('admin.pengaturan-akun.session.destroy');
+
+    // Route Notifikasi Admin
+    Route::post('/notifications/mark-read/{id?}', [AdminNotificationController::class, 'markRead'])->name('admin.notifications.mark-read');
+    Route::post('/notifications/mark-all-read', [AdminNotificationController::class, 'markAllRead'])->name('admin.notifications.mark-all-read');
+    Route::post('/notifications/dismiss/{id}', [AdminNotificationController::class, 'dismiss'])->name('admin.notifications.dismiss');
+    Route::post('/notifications/clear-all', [AdminNotificationController::class, 'clearAll'])->name('admin.notifications.clear-all');
 });
 
 Route::middleware('auth')->group(function () {

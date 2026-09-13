@@ -25,21 +25,26 @@ class KontakController extends Controller
             'nama'    => 'required|string|max:100',
             'email'   => 'required|email|max:150',
             'telepon' => 'nullable|string|max:25',
-            'subjek'  => 'required|string|max:200',
+            'subjek'  => 'nullable|string|max:200',
             'pesan'   => 'required|string|max:3000',
         ], [
             'nama.required'    => 'Nama lengkap wajib diisi.',
             'email.required'   => 'Alamat email wajib diisi.',
             'email.email'      => 'Format alamat email tidak valid.',
-            'subjek.required'  => 'Subjek pesan wajib diisi.',
             'pesan.required'   => 'Isi pesan wajib diisi.',
         ]);
+
+        $subjek = !empty($validated['subjek'])
+            ? trim($validated['subjek'])
+            : (str_contains($validated['pesan'], 'Juru Bahasa Isyarat') || str_contains($validated['pesan'], 'JBI')
+                ? 'Permohonan Jasa JBI'
+                : 'Pesan Umum');
 
         Pesan::create([
             'nama'          => trim($validated['nama']),
             'email'         => trim($validated['email']),
             'telepon'       => !empty($validated['telepon']) ? trim($validated['telepon']) : null,
-            'subjek'        => trim($validated['subjek']),
+            'subjek'        => $subjek,
             'pesan'         => trim($validated['pesan']),
             'status'        => 'unread',
             'ip_address'    => $request->ip(),

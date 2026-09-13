@@ -32,31 +32,21 @@ export default function TopBar({
         setDropdownAvatarError(false);
     }, [currentUser?.avatar]);
 
-    // Initialize notifications from Inertia shared adminNotifications or fallback
+    // Initialize notifications from Inertia shared adminNotifications or prop fallback to empty array
     const [notifs, setNotifs] = useState(() => {
-        if (notificationList && notificationList.length > 0) return notificationList;
-        if (adminNotifications && adminNotifications.length > 0) return adminNotifications;
-        return [
-            {
-                id: 'notif-1',
-                type: 'warning',
-                icon: 'person_add',
-                title: 'Verifikasi Pendaftaran Santri',
-                desc: 'Ada data pendaftaran santri baru yang perlu ditinjau.',
-                time: 'Baru saja',
-                url: '/admin/pendaftaran',
-                unread: true,
-                category: 'Pendaftaran'
-            }
-        ];
+        if (Array.isArray(notificationList)) return notificationList;
+        if (Array.isArray(adminNotifications)) return adminNotifications;
+        return [];
     });
 
     // Sync with shared adminNotifications if they change
     useEffect(() => {
-        if (adminNotifications && adminNotifications.length > 0 && (!notificationList || notificationList.length === 0)) {
+        if (Array.isArray(notificationList)) {
+            setNotifs(notificationList);
+        } else if (Array.isArray(adminNotifications)) {
             setNotifs(adminNotifications);
         }
-    }, [adminNotifications]);
+    }, [notificationList, adminNotifications]);
 
     const isNotifOpen = showNotificationDropdown !== undefined ? showNotificationDropdown : localShowNotif;
     const setIsNotifOpen = setShowNotificationDropdown || setLocalShowNotif;
@@ -71,22 +61,64 @@ export default function TopBar({
         return true;
     });
 
-    const handleMarkAllAsRead = () => {
+    const handleMarkAllAsRead = (e) => {
+        e?.stopPropagation();
         const updated = notifs.map(n => ({ ...n, unread: false }));
         setNotifs(updated);
         if (setNotificationList) setNotificationList(updated);
+
+        // Sync to backend
+        router.post('/admin/notifications/mark-all-read', {}, {
+            preserveScroll: true,
+            preserveState: true,
+            only: ['adminNotifications']
+        });
+    };
+
+    const handleClearAll = (e) => {
+        e?.stopPropagation();
+        setNotifs([]);
+        if (setNotificationList) setNotificationList([]);
+
+        // Sync to backend
+        router.post('/admin/notifications/clear-all', {}, {
+            preserveScroll: true,
+            preserveState: true,
+            only: ['adminNotifications']
+        });
+    };
+
+    const handleDismissItem = (e, item) => {
+        e?.stopPropagation();
+        const updated = notifs.filter(n => n.id !== item.id);
+        setNotifs(updated);
+        if (setNotificationList) setNotificationList(updated);
+
+        // Sync to backend
+        router.post(`/admin/notifications/dismiss/${encodeURIComponent(item.id)}`, {}, {
+            preserveScroll: true,
+            preserveState: true,
+            only: ['adminNotifications']
+        });
     };
 
     const handleNotifClick = (item) => {
-        // Mark this specific notification as read
+        // Mark this specific notification as read in UI
         const updated = notifs.map(n => n.id === item.id ? { ...n, unread: false } : n);
         setNotifs(updated);
         if (setNotificationList) setNotificationList(updated);
         setIsNotifOpen(false);
 
-        if (item.url) {
-            router.visit(item.url);
-        }
+        // Sync to backend then navigate
+        router.post(`/admin/notifications/mark-read/${encodeURIComponent(item.id)}`, {}, {
+            preserveScroll: true,
+            preserveState: true,
+            onFinish: () => {
+                if (item.url) {
+                    router.visit(item.url);
+                }
+            }
+        });
     };
 
     const [showLogoutModal, setShowLogoutModal] = useState(false);

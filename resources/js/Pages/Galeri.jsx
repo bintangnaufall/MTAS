@@ -1,8 +1,9 @@
 import Layout from "@/Layouts/Layout";
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, usePage } from "@inertiajs/react";
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 
 const Galeri = ({ galleries = [], photos = [], videos = [], featuredItem = null, categories = [] }) => {
+    const { siteSettings = {} } = usePage().props;
     // Filter states
     const [selectedCategory, setSelectedCategory] = useState("Semua");
     const [selectedType, setSelectedType] = useState("all"); // 'all' | 'foto' | 'video'
@@ -254,13 +255,8 @@ const Galeri = ({ galleries = [], photos = [], videos = [], featuredItem = null,
         }
     };
 
-    // Featured event data
-    const featured = featuredItem || {
-        judul: "Perayaan Milad Yayasan Bhakti Arumi Delangga",
-        image: "/images/image4.png",
-        tanggal: "14 Feb 2024",
-        deskripsi: "Momentum bersejarah dalam merayakan perjalanan pengabdian kami. Acara ini dihadiri oleh seluruh santri Maktab Tuli dan Autis, para orang tua, serta tokoh masyarakat setempat untuk mempererat silaturahmi.",
-    };
+    // Featured event data (diatur dari Manajemen Galeri berdasarkan foto/kegiatan prioritas is_featured)
+    const featured = featuredItem;
 
     return (
         <>
@@ -275,16 +271,16 @@ const Galeri = ({ galleries = [], photos = [], videos = [], featuredItem = null,
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#025EDB]/15 shadow-xs mb-5">
                             <span className="w-2 h-2 rounded-full bg-[#025EDB] animate-pulse"></span>
                             <span className="text-xs font-bold uppercase tracking-wider text-[#025EDB]">
-                                Dokumentasi &amp; Arsip Kegiatan
+                                {siteSettings.galeri_header_badge || "Dokumentasi & Arsip Kegiatan"}
                             </span>
                         </div>
 
                         <h1 className="text-[#1A1C1E] font-extrabold text-4xl sm:text-5xl md:text-6xl tracking-tight leading-tight">
-                            Galeri <span className="text-[#025EDB]">Yayasan</span>
+                            {siteSettings.galeri_header_title || <>Galeri <span className="text-[#025EDB]">Yayasan</span></>}
                         </h1>
 
                         <p className="text-[#44474E] text-base md:text-lg font-medium mt-4 max-w-2xl leading-relaxed">
-                            Dokumentasi penuh makna dari setiap langkah dan senyuman adik-adik santri Yayasan Bhakti Arumi Delangga dalam mewujudkan pendidikan inklusif yang berkelanjutan.
+                            {siteSettings.galeri_header_desc || "Dokumentasi penuh makna dari setiap langkah dan senyuman adik-adik santri Yayasan Bhakti Arumi Delangga dalam mewujudkan pendidikan inklusif yang berkelanjutan."}
                         </p>
 
                         {/* Quick Stats Badges */}

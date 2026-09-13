@@ -35,7 +35,7 @@ class DashboardController extends Controller
         })->count();
 
         $totalPendaftaran = Pendaftaran::count();
-        $pendingPendaftaran = Pendaftaran::where('status', 'Menunggu Verifikasi')->count();
+        $pendingPendaftaran = Pendaftaran::whereIn('status', ['Menunggu Verifikasi', 'Pending'])->count();
         $pendaftaranTahunIni = Pendaftaran::whereYear('created_at', date('Y'))->count();
         if ($pendaftaranTahunIni === 0 && $totalPendaftaran > 0) {
             $pendaftaranTahunIni = $totalPendaftaran;
@@ -49,7 +49,10 @@ class DashboardController extends Controller
         $publishedGaleri = Galeri::where('status', 'Published')->count();
 
         $totalPesan = Pesan::count();
-        $unreadPesan = Pesan::where('status', 'unread')->orWhere('status', 'Baru')->count();
+        $unreadPesan = Pesan::where(function ($q) {
+            $q->whereIn('status', ['unread', 'Baru'])
+              ->orWhereNull('status');
+        })->count();
 
         $totalAkun = User::count();
 
@@ -192,17 +195,6 @@ class DashboardController extends Controller
                 'actionUrl' => '/admin/berita',
             ];
         }
-
-        // Default info alert
-        $priorityAlerts[] = [
-            'id' => 'alert_sistem',
-            'type' => 'info',
-            'icon' => 'verified',
-            'title' => 'Sistem Akademik Terhubung',
-            'desc' => 'Database santri Maktab Tuli & administrasi yayasan tersinkronisasi secara real-time.',
-            'actionText' => 'LIHAT DATA SANTRI',
-            'actionUrl' => '/admin/santri',
-        ];
 
         // 4. Accounts List
         $accounts = User::orderBy('id', 'asc')->get()->map(function ($u) {
@@ -358,40 +350,6 @@ class DashboardController extends Controller
             ['day' => 'Ahd', 'aktivitas' => 90, 'perkembangan' => 82, 'count' => $stats['totalSantri']],
         ];
 
-        // 7. Notifications for TopBar
-        $notifications = [];
-        if ($pendingPendaftaran > 0) {
-            $notifications[] = [
-                'id' => 1,
-                'type' => 'error',
-                'icon' => 'how_to_reg',
-                'title' => 'Verifikasi Pendaftaran',
-                'desc' => "Terdapat {$pendingPendaftaran} pendaftaran santri baru menunggu verifikasi.",
-                'time' => 'Baru saja',
-                'unread' => true,
-            ];
-        }
-        if ($unreadPesan > 0) {
-            $notifications[] = [
-                'id' => 2,
-                'type' => 'info',
-                'icon' => 'mark_email_unread',
-                'title' => 'Pesan Masuk Baru',
-                'desc' => "Ada {$unreadPesan} pesan belum dibaca di kotak masuk formulir kontak.",
-                'time' => '10m lalu',
-                'unread' => true,
-            ];
-        }
-        $notifications[] = [
-            'id' => 3,
-            'type' => 'info',
-            'icon' => 'verified',
-            'title' => 'Sinkronisasi Santri Selesai',
-            'desc' => 'Pangkalan data santri MTAS telah diperbarui dengan NIS resmi.',
-            'time' => '1j lalu',
-            'unread' => false,
-        ];
-
         return Inertia::render('Admin/Dashboard', [
             'auth' => [
                 'user' => $request->user(),
@@ -403,7 +361,6 @@ class DashboardController extends Controller
             'monthlyData' => $monthlyData,
             'demographics' => $demographics,
             'accounts' => $accounts,
-            'notifications' => $notifications,
             'pendingRegistrations' => $pendingPendaftaran,
         ]);
     }

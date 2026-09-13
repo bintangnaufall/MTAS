@@ -4,12 +4,37 @@ import React from "react";
 const Footer = () => {
     const { siteSettings = {} } = usePage().props;
 
-    const namaYayasan = siteSettings.contact_nama_yayasan || "Yayasan Bhakti Arumi Delangga";
-    const tagline = siteSettings.hero_description || "Menciptakan ruang belajar yang aman dan memberdayakan bagi teman Tuli dan Autis melalui pendidikan berbasis nilai-nilai kemanusiaan.";
-    const instagram = siteSettings.contact_instagram || "https://www.instagram.com/maktabtuliassami.id/";
-    const tiktok = siteSettings.contact_tiktok || "https://www.tiktok.com/@maktabtuliassami.id";
-    const youtube = siteSettings.contact_youtube || "https://www.youtube.com/@MaktabTuliAsSami";
-    const facebook = siteSettings.contact_facebook || "https://facebook.com/maktabtuliassami";
+    const namaYayasan = siteSettings.footer_nama_yayasan || siteSettings.contact_nama_yayasan || "Yayasan Bhakti Arumi Delangga";
+    const deskripsi = siteSettings.footer_deskripsi || "Memperjuangkan hak-hak penyandang disabilitas secara menyeluruh, mencakup pendidikan agama Islam, kemandirian hidup, dan pendampingan psikologis.";
+    const instagram = siteSettings.footer_instagram || siteSettings.contact_instagram || "https://www.instagram.com/maktabtuliassami.id/";
+    const tiktok = siteSettings.footer_tiktok || siteSettings.contact_tiktok || "https://www.tiktok.com/@maktabtuliassami.id";
+    const youtube = siteSettings.footer_youtube || siteSettings.contact_youtube || "https://www.youtube.com/@MaktabTuliAsSami";
+    const facebook = siteSettings.footer_facebook || siteSettings.contact_facebook || "https://facebook.com/maktabtuliassami";
+
+    const linksTitle = siteSettings.footer_links_title || "Tautan Cepat";
+    const quickLinks = [
+        { text: siteSettings.footer_link1_text || "Beranda", url: siteSettings.footer_link1_url || "/" },
+        { text: siteSettings.footer_link2_text || "Maktab Tuli", url: siteSettings.footer_link2_url || "/maktabtuli" },
+        { text: siteSettings.footer_link3_text || "Berita & Artikel", url: siteSettings.footer_link3_url || "/berita" },
+        { text: siteSettings.footer_link4_text || "Galeri Dokumentasi", url: siteSettings.footer_link4_url || "/galeri" },
+        { text: siteSettings.footer_link5_text || "Kontak Kami", url: siteSettings.footer_link5_url || "/kontak" },
+    ].filter(item => item.text);
+
+    const programTitle = siteSettings.footer_program_title || "Program Utama";
+    const programLinks = [
+        { text: siteSettings.footer_prog1_text || "Maktab Tuli As-Sami", url: siteSettings.footer_prog1_url || "/maktabtuli" },
+        { text: siteSettings.footer_prog2_text || "Maktab Autis & Khusus", url: siteSettings.footer_prog2_url || "/daftar" },
+        { text: siteSettings.footer_prog3_text || "Konseling Parenting Inklusif", url: siteSettings.footer_prog3_url || "/kontak" },
+        { text: siteSettings.footer_prog4_text || "Penerimaan Santri Baru (PSB)", url: siteSettings.footer_prog4_url || "/daftar" },
+    ].filter(item => item.text);
+
+    const ctaTitle = siteSettings.footer_cta_title || "Pendaftaran Santri Baru";
+    const ctaDesc = siteSettings.footer_cta_desc || "Pendaftaran santri baru program Maktab Tuli dan Autis kini dibuka secara daring.";
+    const ctaBtnText = siteSettings.footer_cta_btn_text || "Isi Formulir Online";
+    const ctaBtnLink = siteSettings.footer_cta_btn_link || "/daftar";
+
+    const copyrightText = siteSettings.footer_copyright || `© ${new Date().getFullYear()} ${namaYayasan}. All rights reserved.`;
+    const sloganText = siteSettings.footer_slogan || "Pusat Pendidikan Islam & Kemandirian Disabilitas Sensorik";
 
     return (
         <footer className="bg-white border-t border-[#025EDB]/10 w-full">
@@ -19,7 +44,7 @@ const Footer = () => {
                         {namaYayasan}
                     </span>
                     <p className="text-sm text-[#44474E] py-4 leading-relaxed">
-                        {tagline}
+                        {deskripsi}
                     </p>
                     <div className="flex gap-x-3 mt-2">
                         {/* Instagram */}
@@ -116,51 +141,52 @@ const Footer = () => {
 
                 <div className="flex flex-col sm:w-1/2 lg:w-1/5">
                     <span className="text-[#1A1C1E] text-sm font-bold mb-4">
-                        Tautan Cepat
+                        {linksTitle}
                     </span>
                     <div className="flex flex-col space-y-2.5 text-sm text-[#44474E]">
-                        <Link href="/" className="hover:text-primary transition-colors">Beranda</Link>
-                        <Link href="/maktabtuli" className="hover:text-primary transition-colors">Maktab Tuli</Link>
-                        <Link href="/berita" className="hover:text-primary transition-colors">Berita &amp; Artikel</Link>
-                        <Link href="/galeri" className="hover:text-primary transition-colors">Galeri Dokumentasi</Link>
-                        <Link href="/kontak" className="hover:text-primary transition-colors">Kontak Kami</Link>
+                        {quickLinks.map((link, idx) => (
+                            <Link key={idx} href={link.url} className="hover:text-primary transition-colors">
+                                {link.text}
+                            </Link>
+                        ))}
                     </div>
                 </div>
 
                 <div className="flex flex-col sm:w-1/2 lg:w-1/4">
                     <span className="text-[#1A1C1E] text-sm font-bold mb-4">
-                        Program Utama
+                        {programTitle}
                     </span>
                     <div className="flex flex-col space-y-2.5 text-sm text-[#44474E]">
-                        <Link href="/maktabtuli" className="hover:text-primary transition-colors">Maktab Tuli As-Sami</Link>
-                        <Link href="/daftar" className="hover:text-primary transition-colors">Maktab Autis &amp; Khusus</Link>
-                        <Link href="/kontak" className="hover:text-primary transition-colors">Konseling Parenting Inklusif</Link>
-                        <Link href="/daftar" className="hover:text-primary transition-colors">Penerimaan Santri Baru (PSB)</Link>
+                        {programLinks.map((prog, idx) => (
+                            <Link key={idx} href={prog.url} className="hover:text-primary transition-colors">
+                                {prog.text}
+                            </Link>
+                        ))}
                     </div>
                 </div>
 
                 <div className="flex flex-col lg:w-1/4 bg-[#E6EFFB]/40 p-5 rounded-2xl border border-[#025EDB]/10">
                     <span className="text-[#025EDB] text-sm font-bold mb-2">
-                        Pendaftaran Santri Baru
+                        {ctaTitle}
                     </span>
                     <p className="text-xs text-[#44474E] leading-relaxed mb-4">
-                        Pendaftaran santri baru program Maktab Tuli dan Autis kini dibuka secara daring.
+                        {ctaDesc}
                     </p>
                     <Link
-                        href="/daftar"
+                        href={ctaBtnLink}
                         className="text-xs font-bold text-white bg-[#025EDB] hover:bg-[#0048AB] transition-colors py-2.5 px-4 rounded-xl text-center shadow-xs"
                     >
-                        Isi Formulir Online
+                        {ctaBtnText}
                     </Link>
                 </div>
             </div>
 
             <div className="py-5 px-4 sm:px-12 xl:px-48 border-t border-[#025EDB]/10 max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
                 <span>
-                    © {new Date().getFullYear()} {namaYayasan}. All rights reserved.
+                    {copyrightText}
                 </span>
                 <span>
-                    Pusat Pendidikan Islam &amp; Kemandirian Disabilitas Sensorik
+                    {sloganText}
                 </span>
             </div>
         </footer>

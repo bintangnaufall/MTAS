@@ -46,7 +46,7 @@ class GaleriController extends Controller
         $videos = $allGalleries->filter(fn($item) => $item['tipe'] === 'video')->values();
 
         // Featured Event Item (Kegiatan Utama)
-        $featuredItem = $allGalleries->firstWhere('is_featured', true) ?: $photos->first();
+        $featuredItem = $allGalleries->firstWhere('is_featured', true) ?: $photos->first() ?: $allGalleries->first();
 
         // Categories list
         $categories = [

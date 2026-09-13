@@ -1,16 +1,19 @@
 import Layout from "@/Layouts/Layout";
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, usePage } from "@inertiajs/react";
 import React, { useState } from "react";
+import CtaPendaftaran from "@/Components/Elements/CtaPendaftaran";
 
 const MaktabTuli = ({ galeris = [] }) => {
+    const { siteSettings = {} } = usePage().props;
     const [lightboxItem, setLightboxItem] = useState(null);
 
-    // 7 Core Learning Programs requested
+    // 7 Core Learning Programs
     const programs = [
         {
-            title: "Quran Isyarat",
-            category: "Program Utama",
-            description: "Pembelajaran tilawah, tajwid visual, dan tahfidz Al-Qur'an menggunakan standarisasi mushaf bahasa isyarat.",
+            title: siteSettings.maktab_prog1_title || "Quran Isyarat",
+            category: siteSettings.maktab_prog1_badge || "Program Utama",
+            description: siteSettings.maktab_prog1_desc || "Pembelajaran tilawah, tajwid visual, dan tahfidz Al-Qur'an menggunakan standarisasi mushaf bahasa isyarat.",
+            btnText: siteSettings.maktab_prog1_btn || "Program Aktif MTAS",
             icon: (
                 <svg className="w-8 h-8 text-[#025EDB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -18,9 +21,10 @@ const MaktabTuli = ({ galeris = [] }) => {
             ),
         },
         {
-            title: "Hadist Isyarat",
-            category: "Studi Islam",
-            description: "Pemahaman matan hadits-hadits shahih pilihan dan pengamalan adab nabawi harian melalui bahasa isyarat visual.",
+            title: siteSettings.maktab_prog2_title || "Hadist Isyarat",
+            category: siteSettings.maktab_prog2_badge || "Studi Islam",
+            description: siteSettings.maktab_prog2_desc || "Pemahaman matan hadits-hadits shahih pilihan dan pengamalan adab nabawi harian melalui bahasa isyarat visual.",
+            btnText: siteSettings.maktab_prog2_btn || "Program Aktif MTAS",
             icon: (
                 <svg className="w-8 h-8 text-[#025EDB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -28,9 +32,10 @@ const MaktabTuli = ({ galeris = [] }) => {
             ),
         },
         {
-            title: "Fiqih Isyarat",
-            category: "Ibadah Praktis",
-            description: "Bimbingan tata cara thaharah, shalat, puasa, dan hukum-hukum muamalah Islam secara aplikatif dan terstruktur.",
+            title: siteSettings.maktab_prog3_title || "Fiqih Isyarat",
+            category: siteSettings.maktab_prog3_badge || "Ibadah Praktis",
+            description: siteSettings.maktab_prog3_desc || "Bimbingan tata cara thaharah, shalat, puasa, dan hukum-hukum muamalah Islam secara aplikatif dan terstruktur.",
+            btnText: siteSettings.maktab_prog3_btn || "Program Aktif MTAS",
             icon: (
                 <svg className="w-8 h-8 text-[#025EDB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
@@ -38,9 +43,10 @@ const MaktabTuli = ({ galeris = [] }) => {
             ),
         },
         {
-            title: "Pelajaran Umum",
-            category: "Akademik Dasar",
-            description: "Penguatan literasi, numerasi, sains terapan, dan wawasan kebangsaan guna memperluas cakrawala berpikir santri.",
+            title: siteSettings.maktab_prog4_title || "Pelajaran Umum",
+            category: siteSettings.maktab_prog4_badge || "Akademik Dasar",
+            description: siteSettings.maktab_prog4_desc || "Penguatan literasi, numerasi, sains terapan, dan wawasan kebangsaan guna memperluas cakrawala berpikir santri.",
+            btnText: siteSettings.maktab_prog4_btn || "Program Aktif MTAS",
             icon: (
                 <svg className="w-8 h-8 text-[#025EDB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -48,9 +54,10 @@ const MaktabTuli = ({ galeris = [] }) => {
             ),
         },
         {
-            title: "PKBM Ijazah Paket",
-            category: "Pendidikan Formal",
-            description: "Program pendidikan kesetaraan Paket A (SD), B (SMP), dan C (SMA) berijazah resmi negara untuk masa depan santri.",
+            title: siteSettings.maktab_prog5_title || "PKBM Ijazah Paket",
+            category: siteSettings.maktab_prog5_badge || "Pendidikan Formal",
+            description: siteSettings.maktab_prog5_desc || "Program pendidikan kesetaraan Paket A (SD), B (SMP), dan C (SMA) berijazah resmi negara untuk masa depan santri.",
+            btnText: siteSettings.maktab_prog5_btn || "Program Aktif MTAS",
             icon: (
                 <svg className="w-8 h-8 text-[#025EDB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
@@ -58,9 +65,10 @@ const MaktabTuli = ({ galeris = [] }) => {
             ),
         },
         {
-            title: "Persiapan Kuliah",
-            category: "Lanjutan Studi",
-            description: "Bimbingan seleksi masuk perguruan tinggi inklusif, pendampingan beasiswa, dan penguatan kemandirian akademis tinggi.",
+            title: siteSettings.maktab_prog6_title || "Persiapan Kuliah",
+            category: siteSettings.maktab_prog6_badge || "Lanjutan Studi",
+            description: siteSettings.maktab_prog6_desc || "Bimbingan seleksi masuk perguruan tinggi inklusif, pendampingan beasiswa, dan penguatan kemandirian akademis tinggi.",
+            btnText: siteSettings.maktab_prog6_btn || "Program Aktif MTAS",
             icon: (
                 <svg className="w-8 h-8 text-[#025EDB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path d="M12 14l9-5-9-5-9 5 9 5z" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
@@ -70,9 +78,10 @@ const MaktabTuli = ({ galeris = [] }) => {
             ),
         },
         {
-            title: "Sanggar Seni",
-            category: "Kreativitas & Kriya",
-            description: "Wadah kreasi seni lukis, kaligrafi Islam, desain grafis, fotografi, dan kriya tangan untuk kemandirian berwirausaha.",
+            title: siteSettings.maktab_prog7_title || "Sanggar Seni",
+            category: siteSettings.maktab_prog7_badge || "Kreativitas & Kriya",
+            description: siteSettings.maktab_prog7_desc || "Wadah kreasi seni lukis, kaligrafi Islam, desain grafis, fotografi, dan kriya tangan untuk kemandirian berwirausaha.",
+            btnText: siteSettings.maktab_prog7_btn || "Program Aktif MTAS",
             icon: (
                 <svg className="w-8 h-8 text-[#025EDB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 21a4 4 0 01-4-4 5 5 0 015-5c.5 0 1 .1 1.5.3L15 4a2 2 0 012.8 0l2.2 2.2a2 2 0 010 2.8l-8.3 5.5c.2.5.3 1 .3 1.5a5 5 0 01-5 5H7z" />
@@ -215,8 +224,8 @@ const MaktabTuli = ({ galeris = [] }) => {
     // 6 Supporting Facilities
     const facilities = [
         {
-            title: "Ruang Kelas Multimedia",
-            desc: "Dilengkapi proyektor resolusi tinggi, monitor interaktif, dan pencahayaan optimal untuk kenyamanan visual santri.",
+            title: siteSettings.maktab_fac1_title || "Ruang Kelas Multimedia",
+            desc: siteSettings.maktab_fac1_desc || "Dilengkapi proyektor resolusi tinggi, monitor interaktif, dan pencahayaan optimal untuk kenyamanan visual santri.",
             icon: (
                 <svg className="w-6 h-6 text-[#025EDB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -224,8 +233,8 @@ const MaktabTuli = ({ galeris = [] }) => {
             )
         },
         {
-            title: "Media Belajar Digital",
-            desc: "Aplikasi kamus isyarat agama, video pembelajaran animasi, dan modul visual yang dapat diulang kapan pun.",
+            title: siteSettings.maktab_fac2_title || "Media Belajar Digital",
+            desc: siteSettings.maktab_fac2_desc || "Aplikasi kamus isyarat agama, video pembelajaran animasi, dan modul visual yang dapat diulang kapan pun.",
             icon: (
                 <svg className="w-6 h-6 text-[#025EDB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -233,8 +242,8 @@ const MaktabTuli = ({ galeris = [] }) => {
             )
         },
         {
-            title: "Konseling & Bimbingan",
-            desc: "Pendampingan psikologis dan bimbingan kepribadian ramah Tuli guna memperkuat ketangguhan mental dan spiritual.",
+            title: siteSettings.maktab_fac3_title || "Konseling & Bimbingan",
+            desc: siteSettings.maktab_fac3_desc || "Pendampingan psikologis dan bimbingan kepribadian ramah Tuli guna memperkuat ketangguhan mental dan spiritual.",
             icon: (
                 <svg className="w-6 h-6 text-[#025EDB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -242,8 +251,8 @@ const MaktabTuli = ({ galeris = [] }) => {
             )
         },
         {
-            title: "Perpustakaan Visual",
-            desc: "Koleksi buku bertutur visual, literasi sejarah Islam infografis, dan referensi akademik ramah disabilitas rungu.",
+            title: siteSettings.maktab_fac4_title || "Perpustakaan Visual",
+            desc: siteSettings.maktab_fac4_desc || "Koleksi buku bertutur visual, literasi sejarah Islam infografis, dan referensi akademik ramah disabilitas rungu.",
             icon: (
                 <svg className="w-6 h-6 text-[#025EDB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
@@ -251,8 +260,8 @@ const MaktabTuli = ({ galeris = [] }) => {
             )
         },
         {
-            title: "Area Sosialisasi & Asrama",
-            desc: "Lingkungan asrama dan ruang komunal yang nyaman, bersih, dan aman untuk membangun kebersamaan antarsantri.",
+            title: siteSettings.maktab_fac5_title || "Area Sosialisasi & Asrama",
+            desc: siteSettings.maktab_fac5_desc || "Lingkungan asrama dan ruang komunal yang nyaman, bersih, dan aman untuk membangun kebersamaan antarsantri.",
             icon: (
                 <svg className="w-6 h-6 text-[#025EDB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -260,8 +269,8 @@ const MaktabTuli = ({ galeris = [] }) => {
             )
         },
         {
-            title: "Akses Internet Cepat",
-            desc: "Jaringan Wi-Fi berkecepatan tinggi untuk menunjang video conference bahasa isyarat dan riset pembelajaran digital.",
+            title: siteSettings.maktab_fac6_title || "Akses Internet Cepat",
+            desc: siteSettings.maktab_fac6_desc || "Jaringan Wi-Fi berkecepatan tinggi untuk menunjang video conference bahasa isyarat dan riset pembelajaran digital.",
             icon: (
                 <svg className="w-6 h-6 text-[#025EDB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
@@ -279,13 +288,13 @@ const MaktabTuli = ({ galeris = [] }) => {
                     <div className="max-w-4xl">
                         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#CDE1FB] text-[#025EDB] font-bold text-xs uppercase tracking-wider mb-4 shadow-xs">
                             <span className="w-2 h-2 rounded-full bg-[#025EDB] animate-pulse"></span>
-                            <span>Pendidikan Inklusif Berkelanjutan</span>
+                            <span>{siteSettings.maktab_hero_badge || "Pendidikan Inklusif Berkelanjutan"}</span>
                         </div>
                         <h1 className="text-[#0048AB] font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-4 tracking-tight leading-tight">
-                            Maktab Tuli As-Sami
+                            {siteSettings.maktab_hero_title || "Maktab Tuli As-Sami"}
                         </h1>
                         <p className="text-slate-700 text-base md:text-lg lg:text-xl font-medium max-w-2xl leading-relaxed">
-                            Pusat pendidikan Al-Qur'an dan bimbingan agama Islam khusus bagi Teman Tuli, membangun kemandirian spiritual dan intelektual melalui bahasa isyarat serta metode visual terpadu.
+                            {siteSettings.maktab_hero_desc || "Pusat pendidikan Al-Qur'an dan bimbingan agama Islam khusus bagi Teman Tuli, membangun kemandirian spiritual dan intelektual melalui bahasa isyarat serta metode visual terpadu."}
                         </p>
                     </div>
                 </div>
@@ -296,9 +305,10 @@ const MaktabTuli = ({ galeris = [] }) => {
                         <div className="bg-[#EDEAE5]/70 p-3 rounded-3xl border border-gray-200/70 shadow-sm">
                             <div className="relative rounded-2xl overflow-hidden group">
                                 <img
-                                    src="/images/image5.png"
+                                    src={siteSettings.maktab_profile_image || "/images/image5.png"}
                                     alt="Aktivitas Belajar Maktab Tuli"
                                     className="w-full h-[320px] sm:h-[420px] object-cover group-hover:scale-105 transition-transform duration-700"
+                                    onError={(e) => { e.target.src = '/images/image5.png'; }}
                                 />
                                 <div className="absolute bottom-5 right-5 bg-white/95 backdrop-blur-sm rounded-2xl px-5 py-3.5 shadow-lg border border-gray-100">
                                     <h3 className="text-[#025EDB] font-bold text-base">
@@ -314,34 +324,34 @@ const MaktabTuli = ({ galeris = [] }) => {
 
                     <div className="w-full lg:w-1/2 flex flex-col justify-center">
                         <span className="bg-[#FFDDB7] py-1 px-3.5 text-[#653E00] text-xs font-bold w-fit rounded-lg uppercase tracking-wider">
-                            Profil Lembaga
+                            {siteSettings.maktab_profile_badge || "Profil Lembaga"}
                         </span>
                         <h2 className="py-3 font-extrabold text-[#191C1D] text-2xl sm:text-3xl lg:text-4xl leading-snug">
-                            Membuka Jendela Dunia Melalui Cahaya Iman
+                            {siteSettings.maktab_profile_title || "Membuka Jendela Dunia Melalui Cahaya Iman"}
                         </h2>
                         <p className="text-[#424654] text-sm sm:text-base font-normal mb-4 leading-relaxed">
-                            Maktab Tuli As-Sami didirikan dengan tekad untuk menjembatani kesenjangan akses pendidikan agama bagi saudara-saudara kita yang mengalami kendala pendengaran. Kami percaya bahwa Al-Qur'an adalah rahmat bagi semesta alam, tanpa terkecuali.
+                            {siteSettings.maktab_profile_desc1 || "Maktab Tuli As-Sami didirikan dengan tekad untuk menjembatani kesenjangan akses pendidikan agama bagi saudara-saudara kita yang mengalami kendala pendengaran. Kami percaya bahwa Al-Qur'an adalah rahmat bagi semesta alam, tanpa terkecuali."}
                         </p>
                         <p className="text-[#424654] text-sm sm:text-base font-normal mb-8 leading-relaxed">
-                            Berawal dari kelompok belajar kecil, kini kami bertumbuh menjadi institusi yang mengintegrasikan kurikulum agama tradisional dengan pendekatan teknologi visual modern, memastikan setiap santri dapat memahami esensi Islam dengan cara yang paling efektif bagi mereka.
+                            {siteSettings.maktab_profile_desc2 || "Berawal dari kelompok belajar kecil, kini kami bertumbuh menjadi institusi yang mengintegrasikan kurikulum agama tradisional dengan pendekatan teknologi visual modern, memastikan setiap santri dapat memahami esensi Islam dengan cara yang paling efektif bagi mereka."}
                         </p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="flex flex-col bg-[#F8F9FA] p-5 rounded-2xl border border-gray-100 hover:border-blue-200 hover:bg-[#E6EFFB]/40 transition-all duration-300">
                                 <span className="text-[#0048AB] text-lg font-bold mb-1.5 flex items-center gap-2">
                                     <span className="w-2 h-2 rounded-full bg-[#0048AB]"></span>
-                                    Kurikulum Visual
+                                    {siteSettings.maktab_poin1_title || "Kurikulum Visual"}
                                 </span>
                                 <span className="text-[#424654] font-normal text-xs leading-relaxed">
-                                    Disusun sistematis dengan infografis, video interaktif, dan kamus isyarat Al-Qur'an standar.
+                                    {siteSettings.maktab_poin1_desc || "Disusun sistematis dengan infografis, video interaktif, dan kamus isyarat Al-Qur'an standar."}
                                 </span>
                             </div>
                             <div className="flex flex-col bg-[#F8F9FA] p-5 rounded-2xl border border-gray-100 hover:border-blue-200 hover:bg-[#E6EFFB]/40 transition-all duration-300">
                                 <span className="text-[#0048AB] text-lg font-bold mb-1.5 flex items-center gap-2">
                                     <span className="w-2 h-2 rounded-full bg-[#0048AB]"></span>
-                                    Kemandirian Berdikari
+                                    {siteSettings.maktab_poin2_title || "Kemandirian Berdikari"}
                                 </span>
                                 <span className="text-[#424654] font-normal text-xs leading-relaxed">
-                                    Membekali santri dengan ijazah formal kesetaraan, keterampilan seni, dan kesiapan masuk dunia kerja/kuliah.
+                                    {siteSettings.maktab_poin2_desc || "Membekali santri dengan ijazah formal kesetaraan, keterampilan seni, dan kesiapan masuk dunia kerja/kuliah."}
                                 </span>
                             </div>
                         </div>
@@ -350,18 +360,6 @@ const MaktabTuli = ({ galeris = [] }) => {
 
                 {/* ── VISI & MISI (BALANCED & CLEAN) ── */}
                 <div className="bg-white border-y border-gray-100 xl:px-48 px-6 py-16 lg:py-24">
-                    <div className="text-center max-w-2xl mx-auto mb-12">
-                        <span className="text-xs font-bold text-[#025EDB] uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-md border border-blue-100">
-                            Arah &amp; Komitmen Lembaga
-                        </span>
-                        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#191C1D] mt-3">
-                            Visi &amp; Misi Maktab Tuli
-                        </h2>
-                        <p className="text-sm text-[#424654] mt-2">
-                            Pondasi nilai dan langkah nyata kami dalam membimbing santri Tuli menuju kemuliaan akhlak dan kemandirian hidup.
-                        </p>
-                    </div>
-
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
                         {/* VISI CARD */}
                         <div className="bg-gradient-to-br from-[#F4F8FF] to-white border border-[#CDE1FB] rounded-3xl p-6 sm:p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
@@ -374,27 +372,37 @@ const MaktabTuli = ({ galeris = [] }) => {
                                         </svg>
                                     </div>
                                     <div>
-                                        <span className="text-[11px] font-bold tracking-wider text-[#025EDB] uppercase">Tujuan Jangka Panjang</span>
-                                        <h3 className="text-xl sm:text-2xl font-black text-[#0048AB]">Visi Utama</h3>
+                                        <span className="text-[11px] font-bold tracking-wider text-[#025EDB] uppercase">
+                                            {siteSettings.maktab_visi_badge || "Tujuan Jangka Panjang"}
+                                        </span>
+                                        <h3 className="text-xl sm:text-2xl font-black text-[#0048AB]">
+                                            {siteSettings.maktab_visi_title || "Visi Utama"}
+                                        </h3>
                                     </div>
                                 </div>
 
                                 <blockquote className="text-[#191C1D] font-bold text-base sm:text-lg leading-relaxed mb-6 bg-white p-4 rounded-2xl border border-blue-100/70 shadow-2xs">
-                                    "Menjadi pusat unggulan pendidikan Al-Qur'an dan studi keislaman inklusif bagi Teman Tuli yang melahirkan generasi beriman, berakhlak mulia, cerdas berilmu, serta mandiri secara global."
+                                    “{siteSettings.maktab_visi_text || "Menjadi pusat unggulan pembelajaran Al-Qur'an dan studi keislaman inklusif bagi Teman Tuli di Indonesia yang berakhlak mulia, berilmu amaliah, dan mandiri secara peradaban."}”
                                 </blockquote>
 
                                 <div className="space-y-3 text-xs sm:text-sm text-[#424654]">
                                     <div className="flex items-start gap-3">
                                         <span className="w-5 h-5 rounded-full bg-[#025EDB]/10 text-[#025EDB] flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">1</span>
-                                        <span className="leading-relaxed">Pusat rujukan terdepan dalam standarisasi pembelajaran Al-Qur'an dan Hadits berbasis isyarat visual.</span>
+                                        <span className="leading-relaxed">
+                                            {siteSettings.maktab_visi_poin1 || "Pusat rujukan terdepan dalam standarisasi pembelajaran Al-Qur'an dan Hadits berbasis isyarat visual."}
+                                        </span>
                                     </div>
                                     <div className="flex items-start gap-3">
                                         <span className="w-5 h-5 rounded-full bg-[#025EDB]/10 text-[#025EDB] flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">2</span>
-                                        <span className="leading-relaxed">Mewujudkan ruang tumbuh kembang yang aman, berdaya, dan setara bagi santri disabilitas rungu.</span>
+                                        <span className="leading-relaxed">
+                                            {siteSettings.maktab_visi_poin2 || "Mewujudkan ruang tumbuh kembang yang aman, berdaya, dan setara bagi santri disabilitas rungu."}
+                                        </span>
                                     </div>
                                     <div className="flex items-start gap-3">
                                         <span className="w-5 h-5 rounded-full bg-[#025EDB]/10 text-[#025EDB] flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">3</span>
-                                        <span className="leading-relaxed">Membangun generasi muslim Tuli yang percaya diri, mandiri secara ekonomi, dan berkontribusi di masyarakat.</span>
+                                        <span className="leading-relaxed">
+                                            {siteSettings.maktab_visi_poin3 || "Membangun generasi muslim Tuli yang percaya diri, mandiri secara ekonomi, dan berkontribusi di masyarakat."}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -410,27 +418,46 @@ const MaktabTuli = ({ galeris = [] }) => {
                                         </svg>
                                     </div>
                                     <div>
-                                        <span className="text-[11px] font-bold tracking-wider text-[#D38B1D] uppercase">Langkah Strategis</span>
-                                        <h3 className="text-xl sm:text-2xl font-black text-[#855400]">Misi Lembaga</h3>
+                                        <span className="text-[11px] font-bold tracking-wider text-[#D38B1D] uppercase">
+                                            {siteSettings.maktab_misi_badge || "Langkah Strategis"}
+                                        </span>
+                                        <h3 className="text-xl sm:text-2xl font-black text-[#855400]">
+                                            {siteSettings.maktab_misi_title || "Misi Lembaga"}
+                                        </h3>
                                     </div>
                                 </div>
 
                                 <p className="text-[#191C1D] font-bold text-base sm:text-lg leading-relaxed mb-6 bg-white p-4 rounded-2xl border border-amber-100/70 shadow-2xs">
-                                    "Mewujudkan layanan pendidikan Islam terpadu, kesetaraan akademik, dan vokasi terapan melalui tiga pilar utama:"
+                                    "{siteSettings.maktab_misi_intro || "Mewujudkan layanan pendidikan Islam terpadu, kesetaraan akademik, dan vokasi terapan melalui tiga pilar utama:"}"
                                 </p>
 
                                 <div className="space-y-3 text-xs sm:text-sm text-[#424654]">
                                     <div className="flex items-start gap-3">
                                         <span className="w-5 h-5 rounded-full bg-[#D38B1D]/15 text-[#855400] flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">1</span>
-                                        <span className="leading-relaxed"><strong>Pendidikan Agama:</strong> Menyelenggarakan tilawah Al-Qur'an, Hadits, dan Fiqih berbasis isyarat baku (BISINDO) serta media interaktif.</span>
+                                        <span className="leading-relaxed">
+                                            {siteSettings.maktab_misi_poin1_title && (
+                                                <strong className="text-[#191C1D]">{siteSettings.maktab_misi_poin1_title}: </strong>
+                                            )}
+                                            {siteSettings.maktab_misi_poin1_desc || "Menyelenggarakan tilawah Al-Qur'an, Hadits, dan Fiqih berbasis isyarat baku (BISINDO) serta media interaktif."}
+                                        </span>
                                     </div>
                                     <div className="flex items-start gap-3">
                                         <span className="w-5 h-5 rounded-full bg-[#D38B1D]/15 text-[#855400] flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">2</span>
-                                        <span className="leading-relaxed"><strong>Kesetaraan Formal:</strong> Memfasilitasi program PKBM berijazah resmi negara serta bimbingan intensif persiapan masuk universitas.</span>
+                                        <span className="leading-relaxed">
+                                            {siteSettings.maktab_misi_poin2_title && (
+                                                <strong className="text-[#191C1D]">{siteSettings.maktab_misi_poin2_title}: </strong>
+                                            )}
+                                            {siteSettings.maktab_misi_poin2_desc || "Memfasilitasi program PKBM berijazah resmi negara serta bimbingan intensif persiapan masuk universitas."}
+                                        </span>
                                     </div>
                                     <div className="flex items-start gap-3">
                                         <span className="w-5 h-5 rounded-full bg-[#D38B1D]/15 text-[#855400] flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">3</span>
-                                        <span className="leading-relaxed"><strong>Kemandirian Vokasi:</strong> Mengembangkan bakat sanggar seni, kriya, teknologi digital, dan wirausaha kreatif santri.</span>
+                                        <span className="leading-relaxed">
+                                            {siteSettings.maktab_misi_poin3_title && (
+                                                <strong className="text-[#191C1D]">{siteSettings.maktab_misi_poin3_title}: </strong>
+                                            )}
+                                            {siteSettings.maktab_misi_poin3_desc || "Mengembangkan bakat sanggar seni, kriya, teknologi digital, dan wirausaha kreatif santri."}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -442,13 +469,13 @@ const MaktabTuli = ({ galeris = [] }) => {
                 <div className="flex flex-col xl:px-48 px-6 py-16 lg:py-24 bg-[#F8F9FA]">
                     <div className="text-center max-w-2xl mx-auto mb-12">
                         <span className="text-xs text-[#025EDB] font-bold uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-md border border-blue-100">
-                            Kurikulum &amp; Bidang Studi
+                            {siteSettings.maktab_program_badge || "KURIKULUM TERSTRUKTUR"}
                         </span>
                         <h2 className="mt-2 text-[#191C1D] text-2xl sm:text-3xl lg:text-4xl font-extrabold">
-                            Program Pembelajaran Terpadu
+                            {siteSettings.maktab_program_title || "7 Program Belajar Utama"}
                         </h2>
                         <p className="text-sm text-[#424654] mt-2">
-                            Integrasi antara ilmu keislaman, pendidikan kesetaraan nasional, dan keterampilan aplikatif untuk masa depan santri.
+                            {siteSettings.maktab_program_desc || "Dirancang komprehensif memadukan studi keislaman, penguatan akademis, dan kesiapan kemandirian masa depan santri."}
                         </p>
                     </div>
 
@@ -477,7 +504,7 @@ const MaktabTuli = ({ galeris = [] }) => {
                                     </p>
                                 </div>
                                 <div className="mt-5 pt-3 border-t border-gray-100 flex items-center gap-1.5 text-xs font-semibold text-[#025EDB]">
-                                    <span>Program Aktif MTAS</span>
+                                    <span>{prog.btnText || "Program Aktif MTAS"}</span>
                                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                                     </svg>
@@ -683,13 +710,13 @@ const MaktabTuli = ({ galeris = [] }) => {
                 <div className="xl:px-48 px-6 py-16 lg:py-24 flex flex-col bg-white border-t border-gray-100">
                     <div className="text-center max-w-2xl mx-auto mb-12">
                         <span className="text-xs text-[#025EDB] font-bold uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-md border border-blue-100">
-                            Sarana &amp; Prasarana
+                            {siteSettings.maktab_fasilitas_badge || "SARANA & PRASARANA"}
                         </span>
                         <h2 className="mt-2 text-[#191C1D] text-2xl sm:text-3xl lg:text-4xl font-extrabold">
-                            Fasilitas Pendukung Belajar
+                            {siteSettings.maktab_fasilitas_title || "Fasilitas Pendukung Belajar"}
                         </h2>
                         <p className="text-sm text-[#424654] mt-2">
-                            Kenyamanan dan kelengkapan fasilitas adalah prioritas utama kami demi mendukung proses belajar santri yang optimal.
+                            {siteSettings.maktab_fasilitas_desc || "Kenyamanan dan kelengkapan fasilitas adalah prioritas utama kami demi mendukung proses belajar santri yang optimal."}
                         </p>
                     </div>
 
@@ -716,6 +743,9 @@ const MaktabTuli = ({ galeris = [] }) => {
                         ))}
                     </div>
                 </div>
+
+                {/* ── CTA Pendaftaran & Konsultasi ── */}
+                <CtaPendaftaran />
 
                 {/* ── LIGHTBOX MODAL ── */}
                 {lightboxItem && (

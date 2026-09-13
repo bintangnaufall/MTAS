@@ -1,6 +1,8 @@
 import Layout from "@/Layouts/Layout";
 import { Head, useForm, usePage } from "@inertiajs/react";
 import React, { useState, useEffect } from "react";
+import KontakCards from "@/Components/Elements/KontakCards";
+import LayananJbi from "@/Components/Elements/LayananJbi";
 
 const Kontak = () => {
     const { flash, siteSettings = {} } = usePage().props;
@@ -14,12 +16,15 @@ const Kontak = () => {
     const contactMapsLink = siteSettings.contact_maps_link || "https://maps.google.com/?q=Maktab+Tuli+As-Sami+Pontianak";
     const contactInstagram = siteSettings.contact_instagram || "https://www.instagram.com/maktabtuliassami.id/";
 
+    const cleanWhatsappNum = contactWhatsapp.replace(/[^0-9]/g, "");
+    const formattedWa = cleanWhatsappNum.startsWith("0") ? "62" + cleanWhatsappNum.slice(1) : cleanWhatsappNum;
+
     // Inertia Form Hook connected to backend POST /kontak
     const { data, setData, post, processing, errors, reset, recentlySuccessful } = useForm({
         nama: "",
         email: "",
         telepon: "",
-        subjek: "",
+        subjek: "Pesan Umum",
         pesan: "",
     });
 
@@ -68,85 +73,26 @@ const Kontak = () => {
         }
     };
 
-    const cleanWhatsappNum = contactWhatsapp.replace(/[^0-9]/g, '');
-    const formattedWa = cleanWhatsappNum.startsWith('0') ? '62' + cleanWhatsappNum.slice(1) : cleanWhatsappNum;
-
-    const contactCards = [
-        {
-            icon: (
-                <svg className="w-6 h-6 text-[#025EDB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-            ),
-            title: "Alamat Kantor",
-            value: contactAddress.split(',')[0] || "Pontianak",
-            subtext: "Kantor & Asrama",
-            actionLabel: "Lihat di Peta",
-            actionHref: "#lokasi-yayasan",
-            isExternal: false,
-        },
-        {
-            icon: (
-                <svg className="w-6 h-6 text-[#025EDB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-            ),
-            title: "Telepon & WhatsApp",
-            value: contactPhone,
-            subtext: contactHours,
-            actionLabel: "Chat WhatsApp",
-            actionHref: `https://wa.me/${formattedWa}?text=Halo%20Yayasan%20Bhakti%20Arumi%20Delangga,%20saya%20ingin%20bertanya%20mengenai...`,
-            isExternal: true,
-        },
-        {
-            icon: (
-                <svg className="w-6 h-6 text-[#025EDB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-            ),
-            title: "Email Resmi",
-            value: contactEmail,
-            subtext: "Respon Cepat",
-            actionLabel: "Kirim Email",
-            actionHref: `mailto:${contactEmail}`,
-            isExternal: true,
-        },
-        {
-            icon: (
-                <svg className="w-6 h-6 text-[#025EDB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-            ),
-            title: "Instagram Resmi",
-            value: "@maktabtuliassami.id",
-            subtext: "Dokumentasi",
-            actionLabel: "Buka Instagram",
-            actionHref: contactInstagram,
-            isExternal: true,
-        },
-    ];
-
     const faqs = [
         {
-            question: "Bagaimana prosedur pemesanan Jasa Juru Bahasa Isyarat (JBI)?",
-            answer: "Pemesanan JBI disarankan diajukan minimal H-3 atau H-7 sebelum hari kegiatan agar tim kami dapat mengonfirmasi jadwal ketersediaan JBI dan mempelajari materi acara. Layanan tersedia secara luring (tatap muka di Pontianak & sekitarnya) maupun daring (Zoom/Live Streaming seluruh Indonesia). Anda dapat mengajukan permohonan melalui formulir di halaman ini atau langsung menghubungi admin WhatsApp kami.",
+            question: siteSettings.contact_faq1_q || "Bagaimana prosedur pemesanan Jasa Juru Bahasa Isyarat (JBI)?",
+            answer: siteSettings.contact_faq1_a || "Pemesanan JBI disarankan diajukan minimal H-3 atau H-7 sebelum hari kegiatan agar tim kami dapat mengonfirmasi jadwal ketersediaan JBI dan mempelajari materi acara. Layanan tersedia secara luring (tatap muka di Pontianak & sekitarnya) maupun daring (Zoom/Live Streaming seluruh Indonesia). Anda dapat mengajukan permohonan melalui formulir di halaman ini atau langsung menghubungi admin WhatsApp kami.",
         },
         {
-            question: "Bagaimana alur pendaftaran santri baru Maktab Tuli & Maktab Autis?",
-            answer: "Pendaftaran dapat dilakukan secara online melalui menu 'Daftar' di bagian atas situs ini atau datang langsung ke kantor yayasan. Setelah pengisian formulir, tim kami akan menjadwalkan sesi observasi/asesmen awal serta konsultasi bersama orang tua calon santri.",
+            question: siteSettings.contact_faq2_q || "Bagaimana alur pendaftaran santri baru Maktab Tuli & Maktab Autis?",
+            answer: siteSettings.contact_faq2_a || "Pendaftaran dapat dilakukan secara online melalui menu 'Daftar' di bagian atas situs ini atau datang langsung ke kantor yayasan. Setelah pengisian formulir, tim kami akan menjadwalkan sesi observasi/asesmen awal serta konsultasi bersama orang tua calon santri.",
         },
         {
-            question: "Program maktab apa saja yang tersedia di yayasan?",
-            answer: "Kami menyelenggarakan Program Pembelajaran Al-Qur'an Isyarat, Kelas Bahasa Isyarat (BISINDO), Bimbingan Fiqih & Tauhid, Terapi Perkembangan & Kemandirian untuk Anak Autis, serta Pelatihan Kewirausahaan/Karya Inklusi.",
+            question: siteSettings.contact_faq3_q || "Program maktab apa saja yang tersedia di yayasan?",
+            answer: siteSettings.contact_faq3_a || "Kami menyelenggarakan Program Pembelajaran Al-Qur'an Isyarat, Kelas Bahasa Isyarat (BISINDO), Bimbingan Fiqih & Tauhid, Terapi Perkembangan & Kemandirian untuk Anak Autis, serta Pelatihan Kewirausahaan/Karya Inklusi.",
         },
         {
-            question: "Apakah tersedia program beasiswa / bantuan bagi santri prasejahtera?",
-            answer: "Ya, Yayasan Bhakti Arumi Delangga memiliki program beasiswa penuh maupun subsidi pendidikan bagi keluarga prasejahtera dan yatim piatu yang didukung oleh program kepedulian sosial yayasan.",
+            question: siteSettings.contact_faq4_q || "Apakah tersedia program beasiswa / bantuan bagi santri prasejahtera?",
+            answer: siteSettings.contact_faq4_a || "Ya, Yayasan Bhakti Arumi Delangga memiliki program beasiswa penuh maupun subsidi pendidikan bagi keluarga prasejahtera dan yatim piatu yang didukung oleh program kepedulian sosial yayasan.",
         },
         {
-            question: "Bagaimana jika ingin berkunjung atau menjalin kemitraan sosial?",
-            answer: "Kami sangat terbuka untuk kunjungan silaturahmi, studi banding, relawan, maupun kolaborasi CSR instansi. Silakan kirimkan permohonan melalui formulir kontak ini atau hubungi admin WhatsApp kami untuk konfirmasi jadwal.",
+            question: siteSettings.contact_faq5_q || "Bagaimana jika ingin berkunjung atau menjalin kemitraan sosial?",
+            answer: siteSettings.contact_faq5_a || "Kami sangat terbuka untuk kunjungan silaturahmi, studi banding, relawan, maupun kolaborasi CSR instansi. Silakan kirimkan permohonan melalui formulir kontak ini atau hubungi admin WhatsApp kami untuk konfirmasi jadwal.",
         },
     ];
 
@@ -163,187 +109,24 @@ const Kontak = () => {
                     <div className="max-w-5xl mx-auto pt-16 pb-12 px-4 sm:px-6 lg:px-8 text-center">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#CDE1FB] text-[#025EDB] font-bold text-xs uppercase tracking-wider mb-5 shadow-sm shadow-blue-50">
                             <span className="w-2 h-2 rounded-full bg-[#025EDB] animate-pulse"></span>
-                            <span>Pusat Layanan &amp; Informasi</span>
+                            <span>{siteSettings.contact_header_badge || "Pusat Layanan & Informasi"}</span>
                         </div>
                         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#1A1C1E] tracking-tight leading-tight">
-                            Kontak Yayasan Bhakti Arumi
+                            {siteSettings.contact_header_title || "Kontak Yayasan Bhakti Arumi"}
                         </h1>
                         <p className="mt-4 text-base sm:text-lg text-[#5C6F84] max-w-2xl mx-auto leading-relaxed">
-                            Kami siap mendengar, berdiskusi, dan membantu menjawab pertanyaan seputar program pendidikan serta pendaftaran santri.
+                            {siteSettings.contact_header_desc || "Kami siap mendengar, berdiskusi, dan membantu menjawab pertanyaan seputar program pendidikan serta pendaftaran santri."}
                         </p>
                     </div>
 
                     {/* 4 Contact Info Cards */}
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                            {contactCards.map((card, idx) => (
-                                <a
-                                    key={idx}
-                                    href={card.actionHref}
-                                    target={card.isExternal ? "_blank" : undefined}
-                                    rel={card.isExternal ? "noopener noreferrer" : undefined}
-                                    className="group bg-white rounded-2xl p-5 border border-gray-200/80 shadow-xs hover:shadow-lg hover:border-blue-300 transition-all duration-300 flex flex-col justify-between hover:-translate-y-1"
-                                >
-                                    <div>
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-[#E6EFFB] group-hover:bg-[#025EDB] group-hover:text-white transition-colors duration-300 shadow-inner">
-                                                <div className="group-hover:[&_svg]:text-white transition-colors">
-                                                    {card.icon}
-                                                </div>
-                                            </div>
-                                            <span className="text-[10px] font-semibold tracking-wide px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
-                                                {card.subtext}
-                                            </span>
-                                        </div>
-
-                                        <h3 className="text-sm font-bold text-[#1A1C1E] group-hover:text-[#025EDB] transition-colors">
-                                            {card.title}
-                                        </h3>
-                                        <p className="text-xs font-semibold text-slate-600 mt-1 break-words">
-                                            {card.value}
-                                        </p>
-                                    </div>
-
-                                    <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-bold text-[#025EDB] group-hover:text-[#004BCA]">
-                                        <span>{card.actionLabel}</span>
-                                        <svg className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                        </svg>
-                                    </div>
-                                </a>
-                            ))}
-                        </div>
+                        <KontakCards mapTargetHref="#lokasi-yayasan" />
                     </div>
 
                     {/* ── SECTION KHUSUS: JASA LAYANAN JURU BAHASA ISYARAT (JBI) ── */}
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
-                        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#003882] via-[#0048AB] to-[#025EDB] p-8 sm:p-12 text-white shadow-xl">
-                            {/* Ambient Glows */}
-                            <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-blue-300/20 blur-3xl pointer-events-none"></div>
-                            <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-cyan-400/20 blur-3xl pointer-events-none"></div>
-
-                            <div className="relative z-10">
-                                <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8">
-                                    <div className="max-w-2xl">
-                                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 border border-white/25 backdrop-blur-md text-blue-100 font-bold text-xs uppercase tracking-wider mb-4">
-                                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                                            <span>Aksesibilitas &amp; Inklusi Komunikasi</span>
-                                        </div>
-                                        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-snug">
-                                            Jasa Layanan Juru Bahasa Isyarat (JBI)
-                                        </h2>
-                                        <p className="mt-3 text-blue-100/90 text-sm sm:text-base leading-relaxed">
-                                            Yayasan Bhakti Arumi Delangga menyediakan tenaga Juru Bahasa Isyarat (JBI) profesional untuk menjembatani komunikasi yang setara dan inklusif antara Teman Dengar dan Teman Tuli dalam berbagai agenda resmi, keagamaan, pendidikan, maupun publik.
-                                        </p>
-                                    </div>
-
-                                    <div className="flex flex-wrap items-center gap-3">
-                                        <a
-                                            href={`https://wa.me/${formattedWa}?text=Halo%20Yayasan%20Bhakti%20Arumi%20Delangga,%20saya%20ingin%20berkonsultasi%20mengenai%20Jasa%20Layanan%20Juru%20Bahasa%20Isyarat%20(JBI)...`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs sm:text-sm shadow-md transition-all active:scale-98"
-                                        >
-                                            <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                                                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
-                                            </svg>
-                                            <span>Reservasi via WhatsApp</span>
-                                        </a>
-                                        <button
-                                            type="button"
-                                            onClick={handleSelectJbi}
-                                            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-[#0048AB] hover:bg-blue-50 font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer"
-                                        >
-                                            <span>Isi Form Permohonan</span>
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* 4 Cards Lingkup Layanan JBI */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                                    <div className="bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-5 border border-white/15 transition-all">
-                                        <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-3">
-                                            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                                            </svg>
-                                        </div>
-                                        <h3 className="font-bold text-sm sm:text-base text-white mb-1.5">
-                                            Seminar &amp; Konferensi
-                                        </h3>
-                                        <p className="text-xs text-blue-100/80 leading-relaxed">
-                                            Penerjemahan langsung untuk webinar, seminar nasional, rapat dinas, dan pelatihan korporasi.
-                                        </p>
-                                    </div>
-
-                                    <div className="bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-5 border border-white/15 transition-all">
-                                        <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-3">
-                                            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                            </svg>
-                                        </div>
-                                        <h3 className="font-bold text-sm sm:text-base text-white mb-1.5">
-                                            Kajian &amp; Keagamaan
-                                        </h3>
-                                        <p className="text-xs text-blue-100/80 leading-relaxed">
-                                            Penerjemahan khutbah Jum'at, pengajian akbar, kajian tematik Islam, akad nikah, dan tabligh.
-                                        </p>
-                                    </div>
-
-                                    <div className="bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-5 border border-white/15 transition-all">
-                                        <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-3">
-                                            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-                                            </svg>
-                                        </div>
-                                        <h3 className="font-bold text-sm sm:text-base text-white mb-1.5">
-                                            Formal &amp; Pendampingan
-                                        </h3>
-                                        <p className="text-xs text-blue-100/80 leading-relaxed">
-                                            Pendampingan sidang akademik/skripsi, konsultasi medis di faskes, serta urusan kedinasan.
-                                        </p>
-                                    </div>
-
-                                    <div className="bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-5 border border-white/15 transition-all">
-                                        <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-3">
-                                            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                            </svg>
-                                        </div>
-                                        <h3 className="font-bold text-sm sm:text-base text-white mb-1.5">
-                                            Media &amp; Konten Digital
-                                        </h3>
-                                        <p className="text-xs text-blue-100/80 leading-relaxed">
-                                            Penerjemah visual PIP (Picture-in-Picture) video promosi, siaran TV/streaming, dan takarir isyarat.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Badges Keunggulan JBI */}
-                                <div className="pt-6 border-t border-white/15 flex flex-wrap items-center justify-between gap-4 text-xs font-semibold text-blue-100">
-                                    <div className="flex items-center gap-2">
-                                        <svg className="w-4 h-4 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        <span>Standar BISINDO &amp; Bahasa Isyarat Agama</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <svg className="w-4 h-4 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        <span>Tersedia Format Luring &amp; Daring (Zoom / Live)</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <svg className="w-4 h-4 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        <span>Penerjemah Berpengalaman &amp; Beretika</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <LayananJbi onSelectForm={handleSelectJbi} />
                     </div>
 
                     {/* Main Section: Form & Sidebar */}
@@ -397,32 +180,32 @@ const Kontak = () => {
                                     )}
 
                                     <form onSubmit={handleSubmit} className="space-y-5">
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                            {/* Nama Lengkap */}
-                                            <div>
-                                                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                                                    Nama Lengkap <span className="text-red-500">*</span>
-                                                </label>
-                                                <div className="relative">
-                                                    <input
-                                                        type="text"
-                                                        value={data.nama}
-                                                        onChange={(e) => setData("nama", e.target.value)}
-                                                        required
-                                                        placeholder="Contoh: Ahmad Hidayat"
-                                                        className={`w-full px-4 py-3.5 bg-gray-50/80 hover:bg-white focus:bg-white rounded-xl border text-sm text-gray-900 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-[#025EDB]/10 ${
-                                                            errors.nama ? "border-red-500 focus:border-red-500" : "border-gray-200 focus:border-[#025EDB]"
-                                                        }`}
-                                                    />
-                                                </div>
-                                                {errors.nama && (
-                                                    <p className="text-red-500 text-xs mt-1.5 font-medium flex items-center gap-1">
-                                                        <span>•</span> {errors.nama}
-                                                    </p>
-                                                )}
+                                        {/* Nama Lengkap */}
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                                                Nama Lengkap <span className="text-red-500">*</span>
+                                            </label>
+                                            <div className="relative">
+                                                <input
+                                                    type="text"
+                                                    value={data.nama}
+                                                    onChange={(e) => setData("nama", e.target.value)}
+                                                    required
+                                                    placeholder="Contoh: Ahmad Hidayat"
+                                                    className={`w-full px-4 py-3.5 bg-gray-50/80 hover:bg-white focus:bg-white rounded-xl border text-sm text-gray-900 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-[#025EDB]/10 ${
+                                                        errors.nama ? "border-red-500 focus:border-red-500" : "border-gray-200 focus:border-[#025EDB]"
+                                                    }`}
+                                                />
                                             </div>
+                                            {errors.nama && (
+                                                <p className="text-red-500 text-xs mt-1.5 font-medium flex items-center gap-1">
+                                                    <span>•</span> {errors.nama}
+                                                </p>
+                                            )}
+                                        </div>
 
-                                            {/* Email */}
+                                        {/* Alamat Email & Nomor Telepon / WA */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                             <div>
                                                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
                                                     Alamat Email <span className="text-red-500">*</span>
@@ -443,10 +226,7 @@ const Kontak = () => {
                                                     </p>
                                                 )}
                                             </div>
-                                        </div>
 
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                            {/* Nomor Telepon / WA */}
                                             <div>
                                                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
                                                     Nomor Telepon / WhatsApp
@@ -466,66 +246,9 @@ const Kontak = () => {
                                                     </p>
                                                 )}
                                             </div>
-
-                                            {/* Subjek */}
-                                            <div>
-                                                <div className="flex items-center justify-between mb-1.5">
-                                                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                                        Subjek Pesan <span className="text-red-500">*</span>
-                                                    </label>
-                                                </div>
-
-                                                {/* Quick Chips */}
-                                                <div className="flex flex-wrap gap-1.5 mb-2.5">
-                                                    {[
-                                                        { label: "Jasa JBI (Bahasa Isyarat)", subject: "Permohonan Jasa Juru Bahasa Isyarat (JBI)" },
-                                                        { label: "Pendaftaran Santri (PSB)", subject: "Informasi Pendaftaran Santri Baru (PSB)" },
-                                                        { label: "Konsultasi Parenting", subject: "Konsultasi Parenting & Tumbuh Kembang" },
-                                                        { label: "Kemitraan / CSR", subject: "Kemitraan & Kolaborasi Sosial" },
-                                                    ].map((chip, i) => (
-                                                        <button
-                                                            key={i}
-                                                            type="button"
-                                                            onClick={() => {
-                                                                setData("subjek", chip.subject);
-                                                                if (chip.subject.includes("JBI") && !data.pesan) {
-                                                                    setData((prev) => ({
-                                                                        ...prev,
-                                                                        subjek: chip.subject,
-                                                                        pesan: "Halo Admin Yayasan Bhakti Arumi,\n\nSaya bermaksud mengajukan permohonan Jasa Layanan Juru Bahasa Isyarat (JBI) untuk kebutuhan:\n• Nama Kegiatan: \n• Tanggal & Waktu Pelaksanaan: \n• Lokasi (Luring/Daring via Zoom): \n• Perkiraan Durasi Acara: \n• Nama Instansi/Penyelenggara: \n\nMohon informasi ketersediaan JBI dan prosedur administrasinya. Terima kasih."
-                                                                    }));
-                                                                }
-                                                            }}
-                                                            className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all font-semibold cursor-pointer ${
-                                                                data.subjek === chip.subject
-                                                                    ? "bg-[#025EDB] text-white border-[#025EDB] shadow-2xs"
-                                                                    : "bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200"
-                                                            }`}
-                                                        >
-                                                            {chip.label}
-                                                        </button>
-                                                    ))}
-                                                </div>
-
-                                                <input
-                                                    type="text"
-                                                    value={data.subjek}
-                                                    onChange={(e) => setData("subjek", e.target.value)}
-                                                    required
-                                                    placeholder="Contoh: Permohonan Jasa Juru Bahasa Isyarat (JBI)"
-                                                    className={`w-full px-4 py-3.5 bg-gray-50/80 hover:bg-white focus:bg-white rounded-xl border text-sm text-gray-900 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-[#025EDB]/10 ${
-                                                        errors.subjek ? "border-red-500 focus:border-red-500" : "border-gray-200 focus:border-[#025EDB]"
-                                                    }`}
-                                                />
-                                                {errors.subjek && (
-                                                    <p className="text-red-500 text-xs mt-1.5 font-medium flex items-center gap-1">
-                                                        <span>•</span> {errors.subjek}
-                                                    </p>
-                                                )}
-                                            </div>
                                         </div>
 
-                                        {/* Isi Pesan */}
+                                        {/* Isi Pesan / Pertanyaan */}
                                         <div>
                                             <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
                                                 Isi Pesan / Pertanyaan <span className="text-red-500">*</span>
@@ -535,8 +258,8 @@ const Kontak = () => {
                                                 value={data.pesan}
                                                 onChange={(e) => setData("pesan", e.target.value)}
                                                 required
-                                                placeholder="Tuliskan pertanyaan, maksud, atau detail pesan Anda secara lengkap di sini..."
-                                                className={`w-full px-4 py-3.5 bg-gray-50/80 hover:bg-white focus:bg-white rounded-xl border text-sm text-gray-900 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-[#025EDB]/10 resize-none ${
+                                                placeholder="Tuliskan pesan, pertanyaan, saran, atau informasi apa saja yang ingin Anda sampaikan secara lengkap di sini..."
+                                                className={`w-full px-4 py-3.5 bg-gray-50/80 hover:bg-white focus:bg-white rounded-xl border text-sm text-gray-900 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-[#025EDB]/10 resize-none leading-relaxed ${
                                                     errors.pesan ? "border-red-500 focus:border-red-500" : "border-gray-200 focus:border-[#025EDB]"
                                                 }`}
                                             ></textarea>
@@ -609,7 +332,7 @@ const Kontak = () => {
                                     </p>
 
                                     <a
-                                        href="https://wa.me/6281234567890?text=Halo%20Admin%20Yayasan%20Bhakti%20Arumi%20Delangga,%20saya%20ingin%20berkonsultasi..."
+                                        href={`https://wa.me/${formattedWa}?text=Halo%20Admin%20Yayasan%20Bhakti%20Arumi%20Delangga,%20saya%20ingin%20berkonsultasi...`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="w-full bg-white hover:bg-emerald-50 text-[#075E54] font-extrabold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2.5 transition-all shadow-md active:scale-98"
@@ -633,7 +356,7 @@ const Kontak = () => {
                                             ?
                                         </div>
                                         <h3 className="text-lg font-extrabold text-[#1A1C1E]">
-                                            Pertanyaan Sering Diajukan
+                                            {siteSettings.contact_faq_title || "Pertanyaan Sering Diajukan"}
                                         </h3>
                                     </div>
 
@@ -690,13 +413,13 @@ const Kontak = () => {
                                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                         </svg>
-                                        Lokasi Fisik
+                                        {siteSettings.contact_maps_badge || "Lokasi Fisik"}
                                     </div>
                                     <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1A1C1E]">
-                                        Lokasi &amp; Akses Yayasan
+                                        {siteSettings.contact_maps_title || "Lokasi & Akses Yayasan"}
                                     </h2>
                                     <p className="text-sm text-[#5C6F84] mt-1">
-                                        Kunjungi langsung asrama dan kantor Maktab Tuli As-Sami / Yayasan Bhakti Arumi Delangga di Pontianak.
+                                        {siteSettings.contact_maps_desc || "Kunjungi langsung asrama dan kantor Maktab Tuli As-Sami / Yayasan Bhakti Arumi Delangga di Pontianak."}
                                     </p>
                                 </div>
 
@@ -718,7 +441,7 @@ const Kontak = () => {
                                                 <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                                 </svg>
-                                                <span>Salin Alamat</span>
+                                                <span>{siteSettings.contact_maps_copy_btn || "Salin Alamat"}</span>
                                             </>
                                         )}
                                     </button>
@@ -729,7 +452,7 @@ const Kontak = () => {
                                         rel="noopener noreferrer"
                                         className="px-4 py-2.5 rounded-xl bg-[#025EDB] hover:bg-[#004BCA] text-white text-xs font-bold transition flex items-center gap-2 shadow-md shadow-blue-500/20"
                                     >
-                                        <span>Buka di Google Maps</span>
+                                        <span>{siteSettings.contact_maps_btn || "Buka di Google Maps"}</span>
                                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                         </svg>

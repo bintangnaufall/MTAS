@@ -52,64 +52,59 @@ class HandleInertiaRequests extends Middleware
         $notifs = [];
 
         try {
+            $dismissedIds = session('dismissed_admin_notifs', []);
+            $readIds = session('read_admin_notifs', []);
+
             // 1. Pending Registrations
-            $pendingPendaftarans = \App\Models\Pendaftaran::where('status', 'Pending')
+            $pendingPendaftarans = \App\Models\Pendaftaran::whereIn('status', ['Menunggu Verifikasi', 'Pending'])
                 ->latest()
-                ->take(5)
+                ->take(10)
                 ->get();
 
             foreach ($pendingPendaftarans as $p) {
+                $notifId = 'pendaftaran-' . $p->id;
+                if (in_array($notifId, $dismissedIds)) {
+                    continue;
+                }
+
                 $notifs[] = [
-                    'id' => 'pendaftaran-' . $p->id,
+                    'id' => $notifId,
                     'type' => 'warning',
                     'icon' => 'person_add',
                     'title' => 'Pendaftaran Santri Baru',
                     'desc' => $p->nama_lengkap . ' mendaftar program ' . ($p->jenis_maktab ?: 'Maktab Tuli') . ' (' . ($p->no_pendaftaran ?: 'REG-' . $p->id) . '). Menunggu verifikasi.',
                     'time' => $p->created_at ? $p->created_at->diffForHumans() : 'Baru saja',
                     'url' => '/admin/pendaftaran',
-                    'unread' => true,
+                    'unread' => !in_array($notifId, $readIds),
                     'category' => 'Pendaftaran'
                 ];
             }
 
-            // 2. New Contact Messages
-            $newPesans = \App\Models\Pesan::where('status', 'Baru')
-                ->orWhereNull('status')
+            // 2. New / Unread Contact Messages
+            $newPesans = \App\Models\Pesan::where(function ($query) {
+                    $query->whereIn('status', ['unread', 'Baru'])
+                          ->orWhereNull('status');
+                })
                 ->latest()
-                ->take(5)
+                ->take(10)
                 ->get();
 
             foreach ($newPesans as $msg) {
+                $notifId = 'pesan-' . $msg->id;
+                if (in_array($notifId, $dismissedIds)) {
+                    continue;
+                }
+
                 $notifs[] = [
-                    'id' => 'pesan-' . $msg->id,
+                    'id' => $notifId,
                     'type' => 'info',
                     'icon' => 'mark_chat_unread',
                     'title' => 'Pesan Masuk: ' . $msg->nama,
                     'desc' => \Illuminate\Support\Str::limit(($msg->subjek ? $msg->subjek . ' - ' : '') . $msg->pesan, 80),
                     'time' => $msg->created_at ? $msg->created_at->diffForHumans() : 'Baru saja',
                     'url' => '/admin/pesan',
-                    'unread' => true,
+                    'unread' => !in_array($notifId, $readIds),
                     'category' => 'Pesan Kontak'
-                ];
-            }
-
-            // 3. Draft News / Articles
-            $draftBeritas = \App\Models\Berita::where('status', 'Draft')
-                ->latest()
-                ->take(3)
-                ->get();
-
-            foreach ($draftBeritas as $b) {
-                $notifs[] = [
-                    'id' => 'berita-' . $b->id,
-                    'type' => 'secondary',
-                    'icon' => 'newspaper',
-                    'title' => 'Draft Berita Belum Tayang',
-                    'desc' => '"' . \Illuminate\Support\Str::limit($b->judul, 45) . '" masih berstatus draft.',
-                    'time' => $b->updated_at ? $b->updated_at->diffForHumans() : 'Baru saja',
-                    'url' => '/admin/berita',
-                    'unread' => false,
-                    'category' => 'Berita'
                 ];
             }
         } catch (\Throwable $e) {

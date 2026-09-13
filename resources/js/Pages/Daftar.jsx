@@ -1,6 +1,7 @@
 import Layout from "@/Layouts/Layout";
 import { Head, router, usePage } from "@inertiajs/react";
 import React, { useState, useEffect } from "react";
+import KontakCards from "@/Components/Elements/KontakCards";
 
 const Daftar = () => {
     const { flash } = usePage().props;
@@ -531,6 +532,26 @@ const Daftar = () => {
                                 )}
                             </button>
                         </form>
+                    </div>
+                </div>
+
+                {/* ── Bantuan Pendaftaran & Saluran Kontak (4 Cards) ── */}
+                <div className="bg-[#F8F9FA] border-t border-gray-100 py-16 xl:px-48 px-6">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="text-center max-w-2xl mx-auto mb-10">
+                            <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-50 border border-blue-100 text-[#025EDB] font-bold text-xs uppercase tracking-wider mb-3">
+                                <span className="w-2 h-2 rounded-full bg-[#025EDB] animate-pulse"></span>
+                                <span>Layanan Konsultasi PSB</span>
+                            </span>
+                            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1A1C1E] tracking-tight">
+                                Butuh Bantuan Terkait Pendaftaran?
+                            </h2>
+                            <p className="mt-2 text-sm text-[#5C6F84] leading-relaxed">
+                                Tim kepengurusan kami siap membantu menjawab pertanyaan seputar program pendidikan, panduan pengisian berkas, serta verifikasi santri.
+                            </p>
+                        </div>
+
+                        <KontakCards />
                     </div>
                 </div>
             </Layout>

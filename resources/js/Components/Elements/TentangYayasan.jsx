@@ -11,6 +11,7 @@ const TentangYayasan = () => {
     const img4 = siteSettings.about_image4 || "/images/image4.png";
     const sejarahTitle = siteSettings.about_sejarah_title || "Sejarah Singkat";
     const sejarahDesc = siteSettings.about_sejarah_desc || "Berawal dari komunitas kecil yang peduli akan literasi Al-Quran bagi teman tuli.";
+    const misiTitle = siteSettings.about_misi_title || "Komitmen & Misi Utama";
     const misiDesc = siteSettings.about_misi || "Mewujudkan ekosistem pendidikan inklusif berbasis nilai-nilai keislaman dan kemandirian.";
 
     return (
@@ -101,7 +102,7 @@ const TentangYayasan = () => {
                     </div>
 
                     <div className="flex flex-col ml-4">
-                        <span className="xl:text-lg text-base font-bold text-slate-900 group-hover:text-[#025EDB] transition duration-200">Misi Utama</span>
+                        <span className="xl:text-lg text-base font-bold text-slate-900 group-hover:text-[#025EDB] transition duration-200">{misiTitle}</span>
                         <span className="xl:text-base text-xs text-slate-600 leading-relaxed mt-0.5">
                             {misiDesc}
                         </span>

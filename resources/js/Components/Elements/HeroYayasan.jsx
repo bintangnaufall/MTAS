@@ -12,6 +12,8 @@ const HeroYayasan = () => {
     const btn2Text = siteSettings.hero_btn2_text || "Daftar Santri";
     const btn2Link = siteSettings.hero_btn2_link || "/daftar";
     const heroImg = siteSettings.hero_image || "/images/hero_foto.png";
+    const floatingTitle = siteSettings.hero_floating_title || "Santri Inklusif";
+    const floatingSubtitle = siteSettings.hero_floating_subtitle || "Aktif belajar bersama di MTAS";
 
     return (
         <div className="bg-[#E6EFFB]/30 border-b border-[#025EDB]/10">
@@ -80,8 +82,8 @@ const HeroYayasan = () => {
                             <span className="material-symbols-outlined text-[22px]">diversity_3</span>
                         </div>
                         <div>
-                            <p className="text-sm font-extrabold text-[#025EDB] leading-tight">Santri Inklusif</p>
-                            <p className="text-xs text-slate-500 font-medium">Aktif belajar bersama di MTAS</p>
+                            <p className="text-sm font-extrabold text-[#025EDB] leading-tight">{floatingTitle}</p>
+                            <p className="text-xs text-slate-500 font-medium">{floatingSubtitle}</p>
                         </div>
                     </div>
                 </div>

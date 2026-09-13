@@ -1,11 +1,12 @@
 import Layout from "@/Layouts/Layout";
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, usePage } from "@inertiajs/react";
 import React, { useState, useMemo } from "react";
 
 const ITEMS_PER_PAGE = 6;
 const DEFAULT_CATEGORIES = ["Semua", "KEGIATAN", "PENDIDIKAN", "PENGUMUMAN", "MAKTAB TULI"];
 
 const Berita = ({ beritaList = [], featuredBerita = null, aktivitasTerbaru = [], filters = {} }) => {
+    const { siteSettings = {} } = usePage().props;
     const [selectedCategory, setSelectedCategory] = useState(filters?.kategori || "Semua");
     const [searchQuery, setSearchQuery] = useState(filters?.search || "");
     const [currentPage, setCurrentPage] = useState(1);
@@ -108,14 +109,14 @@ const Berita = ({ beritaList = [], featuredBerita = null, aktivitasTerbaru = [],
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#025EDB]/15 shadow-xs mb-5">
                         <span className="w-2 h-2 rounded-full bg-[#025EDB] animate-pulse"></span>
                         <span className="text-[#025EDB] font-bold text-xs uppercase tracking-wider">
-                            Kabar &amp; Informasi Terkini
+                            {siteSettings.berita_header_badge || "Kabar & Informasi Terkini"}
                         </span>
                     </div>
                     <h1 className="text-[#1A1C1E] font-extrabold text-4xl sm:text-5xl md:text-6xl tracking-tight leading-tight">
-                        Berita <span className="text-[#025EDB]">Yayasan</span>
+                        {siteSettings.berita_header_title || <>Berita <span className="text-[#025EDB]">Yayasan</span></>}
                     </h1>
                     <p className="text-[#44474E] text-base md:text-lg font-medium mt-4 max-w-2xl px-6 leading-relaxed">
-                        Informasi, agenda kegiatan, dan kabar terkini seputar program pendidikan dan sosial Yayasan Bhakti Arumi Delangga.
+                        {siteSettings.berita_header_desc || "Informasi, agenda kegiatan, dan kabar terkini seputar program pendidikan dan sosial Yayasan Bhakti Arumi Delangga."}
                     </p>
                 </div>
 
