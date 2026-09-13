@@ -3,8 +3,9 @@ import { Head, useForm, usePage } from "@inertiajs/react";
 import React, { useState, useEffect } from "react";
 import KontakCards from "@/Components/Elements/KontakCards";
 import LayananJbi from "@/Components/Elements/LayananJbi";
+import SecurityCaptcha from "@/Components/Elements/SecurityCaptcha";
 
-const Kontak = () => {
+const Kontak = ({ captcha }) => {
     const { flash, siteSettings = {} } = usePage().props;
 
     const contactAddress = siteSettings.contact_address || "Jl. Arumi Delangga No. 45, Pontianak, Kalimantan Barat, 78124";
@@ -26,6 +27,8 @@ const Kontak = () => {
         telepon: "",
         subjek: "Pesan Umum",
         pesan: "",
+        captcha_answer: "",
+        form_hp_website: "",
     });
 
     const [showSuccessToast, setShowSuccessToast] = useState(false);
@@ -269,6 +272,16 @@ const Kontak = () => {
                                                 </p>
                                             )}
                                         </div>
+
+                                        {/* Verifikasi Keamanan Anti-Bot & Spam */}
+                                        <SecurityCaptcha
+                                            initialQuestion={captcha?.question}
+                                            value={data.captcha_answer}
+                                            onChange={(val) => setData("captcha_answer", val)}
+                                            honeypotValue={data.form_hp_website}
+                                            onHoneypotChange={(val) => setData("form_hp_website", val)}
+                                            errors={errors}
+                                        />
 
                                         {/* Submit Button */}
                                         <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">

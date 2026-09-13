@@ -21,11 +21,15 @@ use App\Http\Controllers\Admin\SantriController as AdminSantriController;
 use App\Http\Controllers\Admin\PendaftaranController as AdminPendaftaranController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
 use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
+use App\Http\Controllers\SecurityController;
 
 // Route Halaman Utama & Profil Lembaga Publik
 Route::get('/', [BerandaController::class, 'index'])->name('beranda');
 Route::redirect('/beranda', '/');
 Route::get('/maktabtuli', [MaktabTuliController::class, 'index'])->name('maktabtuli');
+
+// Route Keamanan & Refresh Captcha Anti-Bot
+Route::get('/captcha/refresh', [SecurityController::class, 'refreshCaptcha'])->name('captcha.refresh');
 
 // Route Berita Publik
 Route::get('/berita', [BeritaController::class, 'index'])->name('berita');
@@ -33,13 +37,13 @@ Route::get('/berita/{id}', [BeritaController::class, 'show'])->name('berita.deta
 
 // Route Kontak Publik
 Route::get('/kontak', [KontakController::class, 'index'])->name('kontak');
-Route::post('/kontak', [KontakController::class, 'store'])->name('kontak.store');
+Route::post('/kontak', [KontakController::class, 'store'])->middleware(['throttle:public-forms'])->name('kontak.store');
 
 Route::get('/galeri', [GaleriController::class, 'index'])->name('galeri');
 
 // Route Pendaftaran Santri Publik
 Route::get('/daftar', [SantriController::class, 'create'])->name('daftar');
-Route::post('/daftar', [SantriController::class, 'store'])->name('daftar.store');
+Route::post('/daftar', [SantriController::class, 'store'])->middleware(['throttle:public-forms'])->name('daftar.store');
 
 // Protected Admin Routes
 Route::middleware(['auth'])->prefix('admin')->group(function () {

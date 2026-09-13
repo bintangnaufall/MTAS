@@ -2,9 +2,10 @@ import Layout from "@/Layouts/Layout";
 import { Head, router, usePage } from "@inertiajs/react";
 import React, { useState, useEffect } from "react";
 import KontakCards from "@/Components/Elements/KontakCards";
+import SecurityCaptcha from "@/Components/Elements/SecurityCaptcha";
 
-const Daftar = () => {
-    const { flash } = usePage().props;
+const Daftar = ({ captcha }) => {
+    const { flash, errors = {} } = usePage().props;
     const [formData, setFormData] = useState({
         nama_lengkap: "",
         jenis_maktab: "Maktab Tuli As-Sami",
@@ -17,6 +18,8 @@ const Daftar = () => {
         pekerjaan_ortu: "",
         alamat_ortu: "",
         keterangan_tambahan: "",
+        captcha_answer: "",
+        form_hp_website: "",
         persetujuan: false,
     });
 
@@ -80,6 +83,8 @@ const Daftar = () => {
                     pekerjaan_ortu: "",
                     alamat_ortu: "",
                     keterangan_tambahan: "",
+                    captcha_answer: "",
+                    form_hp_website: "",
                     persetujuan: false,
                 });
                 setFiles({
@@ -247,6 +252,24 @@ const Daftar = () => {
                                     <p className="font-medium text-emerald-700 text-xs mt-0.5">
                                         Tim kami akan menghubungi Anda dalam 1×24 jam untuk konfirmasi. Terima kasih!
                                     </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {errors && Object.keys(errors).length > 0 && !errors.captcha_answer && (
+                            <div className="mb-8 p-5 bg-red-50 text-red-800 rounded-2xl border border-red-200 text-sm flex items-start gap-3">
+                                <div className="w-9 h-9 bg-red-100 rounded-full flex items-center justify-center shrink-0 text-red-600 mt-0.5">
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="font-bold">Terdapat kesalahan pengisian formulir:</p>
+                                    <ul className="list-disc list-inside text-xs text-red-700 space-y-0.5">
+                                        {Object.values(errors).map((err, idx) => (
+                                            <li key={idx}>{err}</li>
+                                        ))}
+                                    </ul>
                                 </div>
                             </div>
                         )}
@@ -492,6 +515,16 @@ const Daftar = () => {
                                     />
                                 </div>
                             </div>
+
+                            {/* ── Verifikasi Keamanan Anti-Bot ── */}
+                            <SecurityCaptcha
+                                initialQuestion={captcha?.question}
+                                value={formData.captcha_answer}
+                                onChange={(val) => setFormData((prev) => ({ ...prev, captcha_answer: val }))}
+                                honeypotValue={formData.form_hp_website}
+                                onHoneypotChange={(val) => setFormData((prev) => ({ ...prev, form_hp_website: val }))}
+                                errors={errors}
+                            />
 
                             {/* Persetujuan */}
                             <label className="flex items-start gap-3 cursor-pointer group">
