@@ -37,3 +37,223 @@ select[class*="appearance-none"] {
     background-image: none !important;
 }
 
+/* ══════════════════════════════════════════════════════════
+   DARK MODE SYSTEM STYLES
+   ══════════════════════════════════════════════════════════ */
+html.dark {
+    color-scheme: dark;
+}
+
+html.dark body {
+    background-color: #0b1120 !important;
+    color: #f1f5f9 !important;
+}
+
+/* Base Surfaces & Containers */
+html.dark .bg-surface {
+    background-color: #0b1120 !important;
+}
+
+html.dark .bg-background {
+    background-color: #0b1120 !important;
+}
+
+html.dark .bg-surface-container-lowest,
+html.dark .bg-white {
+    background-color: #0f172a !important;
+}
+
+html.dark .bg-surface-container-low,
+html.dark .bg-slate-50,
+html.dark .bg-gray-50 {
+    background-color: #162032 !important;
+}
+
+html.dark .bg-surface-container,
+html.dark .bg-slate-100,
+html.dark .bg-gray-100 {
+    background-color: #1e293b !important;
+}
+
+html.dark .bg-surface-container-high,
+html.dark .bg-slate-200,
+html.dark .bg-gray-200 {
+    background-color: #273549 !important;
+}
+
+html.dark .bg-surface-container-highest,
+html.dark .bg-slate-300,
+html.dark .bg-gray-300 {
+    background-color: #334155 !important;
+}
+
+/* Typography & Contrast in Dark Mode */
+html.dark .text-on-surface,
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-gray-900,
+html.dark .text-gray-800 {
+    color: #f8fafc !important;
+}
+
+html.dark .text-on-surface-variant,
+html.dark .text-slate-700,
+html.dark .text-gray-700,
+html.dark .text-slate-600,
+html.dark .text-gray-600 {
+    color: #cbd5e1 !important;
+}
+
+html.dark .text-outline,
+html.dark .text-slate-500,
+html.dark .text-gray-500,
+html.dark .text-slate-400,
+html.dark .text-gray-400 {
+    color: #94a3b8 !important;
+}
+
+html.dark .border-outline-variant,
+html.dark .border-slate-200,
+html.dark .border-gray-200,
+html.dark .border-slate-100,
+html.dark .border-gray-100 {
+    border-color: #334155 !important;
+}
+
+html.dark [class*="border-outline-variant/"] {
+    border-color: rgba(51, 65, 85, 0.7) !important;
+}
+
+/* Form Inputs, Selects & Textareas in Dark Mode */
+html.dark input:not([type="checkbox"]):not([type="radio"]),
+html.dark select,
+html.dark textarea {
+    background-color: #162032 !important;
+    color: #f1f5f9 !important;
+    border-color: #334155 !important;
+}
+
+html.dark input:not([type="checkbox"]):not([type="radio"]):focus,
+html.dark select:focus,
+html.dark textarea:focus {
+    border-color: #3b82f6 !important;
+    background-color: #1e293b !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+    color: #64748b !important;
+}
+
+/* Checkbox & Radio in Dark Mode */
+html.dark input[type="checkbox"],
+html.dark input[type="radio"] {
+    background-color: #162032;
+    border-color: #475569;
+}
+
+/* Dropdowns, Modals, Cards & Hovers in Dark Mode */
+html.dark .hover\:bg-surface-container-low:hover,
+html.dark .hover\:bg-surface-container:hover,
+html.dark .hover\:bg-surface-container-high:hover,
+html.dark .hover\:bg-slate-50:hover,
+html.dark .hover\:bg-gray-50:hover {
+    background-color: #1e293b !important;
+}
+
+html.dark .shadow-xs,
+html.dark .shadow-sm,
+html.dark .shadow-md,
+html.dark .shadow-lg,
+html.dark .shadow-2xl {
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark .bg-amber-50 {
+    background-color: rgba(120, 53, 15, 0.25) !important;
+    border-color: rgba(217, 119, 6, 0.4) !important;
+    color: #fde68a !important;
+}
+
+html.dark .bg-purple-50 {
+    background-color: rgba(88, 28, 135, 0.25) !important;
+    border-color: rgba(147, 51, 234, 0.4) !important;
+    color: #d8b4fe !important;
+}
+
+html.dark .bg-blue-50,
+html.dark .bg-blue-50\/60 {
+    background-color: rgba(30, 58, 138, 0.25) !important;
+    border-color: rgba(59, 130, 246, 0.4) !important;
+    color: #93c5fd !important;
+}
+
+/* Scrollbar in Dark Mode */
+html.dark ::-webkit-scrollbar-thumb {
+    background: #334155 !important;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+    background: #475569 !important;
+}
+
+/* Table Dark Header & Rows */
+html.dark thead tr {
+    background-color: #162032 !important;
+    border-color: #334155 !important;
+}
+
+html.dark tbody tr {
+    border-color: #1e293b !important;
+}
+
+html.dark tbody tr:hover {
+    background-color: rgba(30, 41, 59, 0.6) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   COMPACT TABLES (TABEL DATA RINGKAS) STYLES
+   ══════════════════════════════════════════════════════════ */
+html.compact-tables table th {
+    padding-top: 0.35rem !important;
+    padding-bottom: 0.35rem !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    font-size: 11px !important;
+    line-height: 1rem !important;
+}
+
+html.compact-tables table td {
+    padding-top: 0.3rem !important;
+    padding-bottom: 0.3rem !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    font-size: 12px !important;
+    line-height: 1.15rem !important;
+}
+
+html.compact-tables table tr {
+    height: auto !important;
+}
+
+html.compact-tables table td .w-11.h-11,
+html.compact-tables table td .w-10.h-10,
+html.compact-tables table td .w-12.h-12,
+html.compact-tables table td .w-9.h-9 {
+    width: 1.85rem !important;
+    height: 1.85rem !important;
+    border-radius: 0.375rem !important;
+}
+
+html.compact-tables table td span.material-symbols-outlined {
+    font-size: 16px !important;
+}
+
+html.compact-tables table td button,
+html.compact-tables table td a {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+    font-size: 11px !important;
+}
+
+

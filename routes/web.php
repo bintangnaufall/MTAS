@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\PendaftaranController as AdminPendaftaranControll
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
 use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
 use App\Http\Controllers\SecurityController;
+use App\Http\Controllers\Auth\GoogleController;
 
 // Route Halaman Utama & Profil Lembaga Publik
 Route::get('/', [BerandaController::class, 'index'])->name('beranda');
@@ -114,7 +115,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::post('/pengaturan-akun/password', [AdminPengaturanAkunController::class, 'updatePassword'])->name('admin.pengaturan-akun.password');
     Route::post('/pengaturan-akun/preferensi', [AdminPengaturanAkunController::class, 'updatePreferences'])->name('admin.pengaturan-akun.preferensi');
     Route::delete('/pengaturan-akun/avatar', [AdminPengaturanAkunController::class, 'deleteAvatar'])->name('admin.pengaturan-akun.avatar.delete');
-    Route::delete('/pengaturan-akun/session/{id}', [AdminPengaturanAkunController::class, 'destroySession'])->name('admin.pengaturan-akun.session.destroy');
+    Route::match(['delete', 'post'], '/pengaturan-akun/session/{id}', [AdminPengaturanAkunController::class, 'destroySession'])->name('admin.pengaturan-akun.session.destroy');
+    Route::post('/pengaturan-akun/google/disconnect', [GoogleController::class, 'disconnectGoogle'])->name('admin.pengaturan-akun.google.disconnect');
 
     // Route Notifikasi Admin
     Route::post('/notifications/mark-read/{id?}', [AdminNotificationController::class, 'markRead'])->name('admin.notifications.mark-read');

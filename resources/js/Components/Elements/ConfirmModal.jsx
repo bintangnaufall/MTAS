@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 export default function ConfirmModal({
     isOpen,
@@ -12,20 +13,40 @@ export default function ConfirmModal({
     icon = 'warning',
     isLoading = false,
 }) {
-    // Listen for ESC key
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    // Listen for ESC key & lock background body scrolling
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Escape' && isOpen && !isLoading) {
                 onClose();
             }
         };
+
         if (isOpen) {
             window.addEventListener('keydown', handleKeyDown);
+            if (typeof document !== 'undefined') {
+                document.body.style.overflow = 'hidden';
+            }
+        } else {
+            if (typeof document !== 'undefined') {
+                document.body.style.overflow = '';
+            }
         }
-        return () => window.removeEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            if (typeof document !== 'undefined') {
+                document.body.style.overflow = '';
+            }
+        };
     }, [isOpen, isLoading, onClose]);
 
-    if (!isOpen) return null;
+    if (!isOpen || !mounted || typeof document === 'undefined') return null;
 
     const variantStyles = {
         danger: {
@@ -48,9 +69,9 @@ export default function ConfirmModal({
 
     const currentVariant = variantStyles[variant] || variantStyles.danger;
 
-    return (
+    const modalMarkup = (
         <div 
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs transition-opacity"
             onClick={() => {
                 if (!isLoading) onClose();
             }}
@@ -101,4 +122,6 @@ export default function ConfirmModal({
             </div>
         </div>
     );
+
+    return createPortal(modalMarkup, document.body);
 }

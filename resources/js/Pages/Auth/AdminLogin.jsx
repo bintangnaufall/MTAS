@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useForm, Head, Link } from "@inertiajs/react";
+import { useForm, Head, Link, usePage } from "@inertiajs/react";
 
 export default function AdminLogin({ status }) {
+    const { flash, errors: pageErrors } = usePage().props;
     const [showPassword, setShowPassword] = useState(false);
     const [activeModal, setActiveModal] = useState(null); // 'security' | 'help' | null
+    const [errorDismissed, setErrorDismissed] = useState(false);
+
+    const googleError = pageErrors?.google;
+    const flashError = flash?.error;
+    const activeError = !errorDismissed ? (googleError || flashError) : null;
+    const activeSuccess = flash?.success || status;
 
     useEffect(() => {
         document.documentElement.classList.add("overflow-hidden");
@@ -15,7 +22,7 @@ export default function AdminLogin({ status }) {
     }, []);
 
     const { data, setData, post, processing, errors, reset } = useForm({
-        email: "bintang7735@gmail.com",
+        email: "",
         password: "",
         remember: true,
     });
@@ -84,17 +91,40 @@ export default function AdminLogin({ status }) {
                             </p>
                         </div>
 
-                        {/* Status Message */}
-                        {status && (
+                        {/* Status / Flash Success Message */}
+                        {activeSuccess && (
                             <div className="mb-3.5 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 animate-in fade-in">
                                 <span className="material-symbols-outlined text-emerald-600 text-[16px]">
                                     check_circle
                                 </span>
-                                <span className="font-medium">{status}</span>
+                                <span className="font-medium">{activeSuccess}</span>
                             </div>
                         )}
 
-                        {/* Error Notification */}
+                        {/* Google OAuth or Flash Error Notification */}
+                        {activeError && (
+                            <div className="mb-3.5 p-3 rounded-xl bg-error-container/40 border border-error/30 text-error text-xs flex items-start justify-between gap-2 animate-in fade-in">
+                                <div className="flex items-start gap-2">
+                                    <span className="material-symbols-outlined text-error text-[18px] shrink-0 mt-0.5">
+                                        error
+                                    </span>
+                                    <div className="space-y-1">
+                                        <p className="font-bold text-[11px] text-error">Otentikasi Google</p>
+                                        <p className="font-medium leading-relaxed">{activeError}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setErrorDismissed(true)}
+                                    className="text-error/70 hover:text-error p-0.5 rounded transition-colors"
+                                    title="Tutup pesan"
+                                >
+                                    <span className="material-symbols-outlined text-[16px]">close</span>
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Email / Form Error Notification */}
                         {errors.email && (
                             <div className="mb-3.5 p-2.5 rounded-xl bg-error-container/40 border border-error/30 text-error text-xs flex items-start gap-2 animate-in fade-in">
                                 <span className="material-symbols-outlined text-error text-[16px] shrink-0 mt-0.5">
@@ -213,7 +243,8 @@ export default function AdminLogin({ status }) {
                         {/* Google OAuth Button */}
                         <a
                             href={typeof route !== "undefined" ? route("auth.google") : "/auth/google"}
-                            className="w-full h-10 bg-surface-container-low hover:bg-surface-container active:bg-surface-container-high border border-outline-variant rounded-xl text-xs font-bold text-on-surface shadow-2xs transition-all duration-200 flex items-center justify-center gap-2.5 cursor-pointer group"
+                            title="Masuk dengan memilih Akun Google"
+                            className="w-full h-11 bg-surface-container-low hover:bg-surface-container active:bg-surface-container-high border border-outline-variant hover:border-primary/40 rounded-xl text-xs font-bold text-on-surface shadow-2xs transition-all duration-200 flex items-center justify-center gap-2.5 cursor-pointer group"
                         >
                             <svg className="w-4 h-4 flex-shrink-0 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -221,7 +252,7 @@ export default function AdminLogin({ status }) {
                                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
                                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                             </svg>
-                            <span>Akun Google Workspace</span>
+                            <span>Masuk dengan Google</span>
                         </a>
 
                         {/* Security & Help Links (Centered) */}

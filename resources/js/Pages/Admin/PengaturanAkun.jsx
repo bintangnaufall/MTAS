@@ -9,8 +9,9 @@ export default function PengaturanAkun({
     user: initialUser,
     userStats = {},
     roleInfo = {},
-    sessions = [],
+    sessions: initialSessions = [],
     preferences: initialPreferences = {},
+    activeTab: propActiveTab,
 }) {
     const { flash, errors } = usePage().props;
     const currentUser = auth?.user || initialUser || {
@@ -19,8 +20,43 @@ export default function PengaturanAkun({
         role: "super_admin",
     };
 
-    // Navigation & UI States
-    const [activeTab, setActiveTab] = useState("profil"); // 'profil' | 'keamanan' | 'preferensi' | 'sesi'
+    // Sessions State (local copy for instant optimistic updates)
+    const [sessions, setSessions] = useState(initialSessions);
+    useEffect(() => {
+        setSessions(initialSessions);
+    }, [initialSessions]);
+
+    // Navigation & UI States with robust URL / Storage tab retention
+    const [activeTab, setActiveTab] = useState(() => {
+        if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            const tabFromUrl = params.get("tab");
+            if (tabFromUrl && ["profil", "keamanan", "preferensi", "sesi"].includes(tabFromUrl)) {
+                return tabFromUrl;
+            }
+        }
+        if (propActiveTab && ["profil", "keamanan", "preferensi", "sesi"].includes(propActiveTab)) {
+            return propActiveTab;
+        }
+        if (typeof window !== "undefined") {
+            const savedTab = sessionStorage.getItem("mtas_admin_profile_tab");
+            if (savedTab && ["profil", "keamanan", "preferensi", "sesi"].includes(savedTab)) {
+                return savedTab;
+            }
+        }
+        return "profil";
+    });
+
+    const handleTabChange = (tabKey) => {
+        setActiveTab(tabKey);
+        if (typeof window !== "undefined") {
+            sessionStorage.setItem("mtas_admin_profile_tab", tabKey);
+            const url = new URL(window.location.href);
+            url.searchParams.set("tab", tabKey);
+            window.history.replaceState({}, "", url);
+        }
+    };
+
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -33,6 +69,25 @@ export default function PengaturanAkun({
     const [isDeletingAvatar, setIsDeletingAvatar] = useState(false);
     const [sessionToDelete, setSessionToDelete] = useState(null);
     const [isDeletingSession, setIsDeletingSession] = useState(false);
+    const [showGoogleDisconnectModal, setShowGoogleDisconnectModal] = useState(false);
+    const [isDisconnectingGoogle, setIsDisconnectingGoogle] = useState(false);
+
+    const confirmDisconnectGoogle = () => {
+        setIsDisconnectingGoogle(true);
+        router.post("/admin/pengaturan-akun/google/disconnect", {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setShowGoogleDisconnectModal(false);
+                setIsDisconnectingGoogle(false);
+            },
+            onError: (errs) => {
+                setIsDisconnectingGoogle(false);
+                if (errs.google) {
+                    setToastError(errs.google);
+                }
+            },
+        });
+    };
 
     useEffect(() => {
         if (flash?.success) {
@@ -49,6 +104,14 @@ export default function PengaturanAkun({
             return () => clearTimeout(timer);
         }
     }, [flash?.error]);
+
+    useEffect(() => {
+        if (errors?.google) {
+            setToastError(errors.google);
+            const timer = setTimeout(() => setToastError(""), 6000);
+            return () => clearTimeout(timer);
+        }
+    }, [errors?.google]);
 
     // Profile Form State
     const [profileForm, setProfileForm] = useState({
@@ -73,6 +136,20 @@ export default function PengaturanAkun({
         setAvatarLoadError(false);
     }, [initialUser?.avatar, currentUser?.avatar]);
 
+    useEffect(() => {
+        if (initialUser) {
+            setProfileForm((prev) => ({
+                ...prev,
+                name: initialUser.name || "",
+                username: initialUser.username || "",
+                email: initialUser.email || "",
+                phone: initialUser.phone || "",
+                jabatan: initialUser.jabatan || "",
+                bio: initialUser.bio || "",
+            }));
+        }
+    }, [initialUser?.email, initialUser?.name, initialUser?.username, initialUser?.phone, initialUser?.jabatan, initialUser?.bio]);
+
     // Password Form State
     const [passwordForm, setPasswordForm] = useState({
         current_password: "",
@@ -94,12 +171,127 @@ export default function PengaturanAkun({
             email_digest: initialPreferences?.notifications?.email_digest ?? true,
         },
         interface: {
-            theme: initialPreferences?.interface?.theme ?? "light",
-            compact_tables: initialPreferences?.interface?.compact_tables ?? false,
+            theme: initialPreferences?.interface?.theme ?? (typeof localStorage !== "undefined" ? localStorage.getItem("mtas_theme") : null) ?? "light",
+            compact_tables: initialPreferences?.interface?.compact_tables ?? (typeof localStorage !== "undefined" ? localStorage.getItem("mtas_compact_tables") === "true" : false),
             sidebar_collapsed: initialPreferences?.interface?.sidebar_collapsed ?? false,
         },
     });
     const [isSavingPrefs, setIsSavingPrefs] = useState(false);
+
+    // Helper penerapan tema gelap/terang/sistem ke DOM secara instan
+    const applyThemeToDOM = (themeMode) => {
+        try {
+            const isDark =
+                themeMode === "dark" ||
+                (themeMode === "system" &&
+                    typeof window !== "undefined" &&
+                    window.matchMedia("(prefers-color-scheme: dark)").matches);
+            if (isDark) {
+                document.documentElement.classList.add("dark");
+            } else {
+                document.documentElement.classList.remove("dark");
+            }
+            if (typeof localStorage !== "undefined") {
+                localStorage.setItem("mtas_theme", themeMode);
+            }
+        } catch (e) {}
+    };
+
+    // Helper penerapan tabel ringkas (compact mode) ke DOM secara instan
+    const applyCompactToDOM = (isCompact) => {
+        try {
+            if (isCompact) {
+                document.documentElement.classList.add("compact-tables");
+            } else {
+                document.documentElement.classList.remove("compact-tables");
+            }
+            if (typeof localStorage !== "undefined") {
+                localStorage.setItem("mtas_compact_tables", isCompact ? "true" : "false");
+            }
+        } catch (e) {}
+    };
+
+    // Sinkronkan preferensi ke DOM saat komponen dimuat
+    useEffect(() => {
+        if (prefs.interface?.theme) {
+            applyThemeToDOM(prefs.interface.theme);
+        }
+        if (typeof prefs.interface?.compact_tables === "boolean") {
+            applyCompactToDOM(prefs.interface.compact_tables);
+        }
+    }, []);
+
+    // Listener otomatis jika memilih mode 'system'
+    useEffect(() => {
+        if (prefs.interface?.theme === "system" && typeof window !== "undefined") {
+            const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+            const handler = (e) => {
+                if (prefs.interface?.theme === "system") {
+                    if (e.matches) {
+                        document.documentElement.classList.add("dark");
+                    } else {
+                        document.documentElement.classList.remove("dark");
+                    }
+                }
+            };
+            mediaQuery.addEventListener("change", handler);
+            return () => mediaQuery.removeEventListener("change", handler);
+        }
+    }, [prefs.interface?.theme]);
+
+    const handleThemeChange = (newTheme) => {
+        const updatedPrefs = {
+            ...prefs,
+            interface: { ...prefs.interface, theme: newTheme },
+        };
+        setPrefs(updatedPrefs);
+        applyThemeToDOM(newTheme);
+
+        // Auto-save preferensi ke server
+        router.post(
+            "/admin/pengaturan-akun/preferensi",
+            { preferences: updatedPrefs },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    const label =
+                        newTheme === "dark"
+                            ? "Gelap"
+                            : newTheme === "light"
+                            ? "Terang"
+                            : "Sistem (Otomatis)";
+                    setToastMessage(`Mode tampilan sistem berhasil diubah ke tema ${label}.`);
+                },
+            }
+        );
+    };
+
+    const handleCompactToggle = (checked) => {
+        const updatedPrefs = {
+            ...prefs,
+            interface: { ...prefs.interface, compact_tables: checked },
+        };
+        setPrefs(updatedPrefs);
+        applyCompactToDOM(checked);
+
+        // Auto-save preferensi ke server
+        router.post(
+            "/admin/pengaturan-akun/preferensi",
+            { preferences: updatedPrefs },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    setToastMessage(
+                        checked
+                            ? "Tabel data ringkas (Compact Mode) berhasil diaktifkan."
+                            : "Tabel data standar berhasil diaktifkan."
+                    );
+                },
+            }
+        );
+    };
 
     // Avatar File Handler
     const handleAvatarChange = (e) => {
@@ -220,15 +412,17 @@ export default function PengaturanAkun({
         e.preventDefault();
         setIsSavingPrefs(true);
 
+        applyThemeToDOM(prefs.interface.theme);
+        applyCompactToDOM(prefs.interface.compact_tables);
+
         router.post(
-            typeof route !== "undefined"
-                ? route("admin.pengaturan-akun.preferensi")
-                : "/admin/pengaturan-akun/preferensi",
+            "/admin/pengaturan-akun/preferensi",
             { preferences: prefs },
             {
                 preserveScroll: true,
                 onSuccess: () => {
                     setIsSavingPrefs(false);
+                    setToastMessage("Preferensi akun & antarmuka berhasil disimpan.");
                 },
                 onError: () => {
                     setIsSavingPrefs(false);
@@ -240,22 +434,38 @@ export default function PengaturanAkun({
     // Destroy Session Handler (Executed via ConfirmModal)
     const confirmDestroySession = () => {
         if (!sessionToDelete) return;
+        const targetId = sessionToDelete;
         setIsDeletingSession(true);
-        router.delete(
-            typeof route !== "undefined"
-                ? route("admin.pengaturan-akun.session.destroy", sessionToDelete)
-                : `/admin/pengaturan-akun/session/${sessionToDelete}`,
-            {
-                preserveScroll: true,
-                onSuccess: () => {
-                    setIsDeletingSession(false);
-                    setSessionToDelete(null);
-                },
-                onError: () => {
-                    setIsDeletingSession(false);
-                },
-            }
-        );
+
+        const url = typeof route !== "undefined"
+            ? route("admin.pengaturan-akun.session.destroy", { id: targetId })
+            : `/admin/pengaturan-akun/session/${encodeURIComponent(targetId)}`;
+
+        router.delete(url, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                setIsDeletingSession(false);
+                setSessionToDelete(null);
+                // Optimistic update of sessions list
+                if (targetId === "all_others") {
+                    setSessions((prev) => prev.filter((s) => s.is_current || s.id === "current"));
+                    setToastMessage("Seluruh sesi perangkat lain berhasil dinonaktifkan.");
+                } else {
+                    setSessions((prev) => prev.filter((s) => s.id !== targetId));
+                    setToastMessage("Sesi perangkat berhasil dinonaktifkan.");
+                }
+            },
+            onError: (errs) => {
+                setIsDeletingSession(false);
+                setSessionToDelete(null);
+                if (errs?.session) {
+                    setToastError(errs.session);
+                } else {
+                    setToastError("Gagal memutuskan sesi perangkat.");
+                }
+            },
+        });
     };
 
     // Password Strength Evaluator
@@ -471,7 +681,8 @@ export default function PengaturanAkun({
                         {/* Navigation Tabs */}
                         <div className="flex items-center gap-2 border-b border-outline-variant pb-px overflow-x-auto">
                             <button
-                                onClick={() => setActiveTab("profil")}
+                                type="button"
+                                onClick={() => handleTabChange("profil")}
                                 className={`flex items-center gap-2 px-5 py-3 font-label-md text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                                     activeTab === "profil"
                                         ? "border-primary text-primary bg-primary/5 rounded-t-xl"
@@ -483,7 +694,8 @@ export default function PengaturanAkun({
                             </button>
 
                             <button
-                                onClick={() => setActiveTab("keamanan")}
+                                type="button"
+                                onClick={() => handleTabChange("keamanan")}
                                 className={`flex items-center gap-2 px-5 py-3 font-label-md text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                                     activeTab === "keamanan"
                                         ? "border-primary text-primary bg-primary/5 rounded-t-xl"
@@ -495,7 +707,8 @@ export default function PengaturanAkun({
                             </button>
 
                             <button
-                                onClick={() => setActiveTab("preferensi")}
+                                type="button"
+                                onClick={() => handleTabChange("preferensi")}
                                 className={`flex items-center gap-2 px-5 py-3 font-label-md text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                                     activeTab === "preferensi"
                                         ? "border-primary text-primary bg-primary/5 rounded-t-xl"
@@ -507,7 +720,8 @@ export default function PengaturanAkun({
                             </button>
 
                             <button
-                                onClick={() => setActiveTab("sesi")}
+                                type="button"
+                                onClick={() => handleTabChange("sesi")}
                                 className={`flex items-center gap-2 px-5 py-3 font-label-md text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                                     activeTab === "sesi"
                                         ? "border-primary text-primary bg-primary/5 rounded-t-xl"
@@ -522,15 +736,16 @@ export default function PengaturanAkun({
                         {/* TAB 1: PROFIL & BIODATA */}
                         {activeTab === "profil" && (
                             <form onSubmit={handleProfileSubmit} className="space-y-6">
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
                                     {/* Left Column: Avatar & Photo Management */}
-                                    <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-xs space-y-5 h-fit">
-                                        <div className="flex items-center gap-2 pb-3 border-b border-outline-variant/60">
-                                            <span className="material-symbols-outlined text-primary text-[20px]">image</span>
-                                            <h3 className="font-headline-sm text-base font-bold text-on-surface">
-                                                Foto Profil
-                                            </h3>
-                                        </div>
+                                    <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-xs flex flex-col justify-between h-full">
+                                        <div className="space-y-5">
+                                            <div className="flex items-center gap-2 pb-3 border-b border-outline-variant/60">
+                                                <span className="material-symbols-outlined text-primary text-[20px]">image</span>
+                                                <h3 className="font-headline-sm text-base font-bold text-on-surface">
+                                                    Foto Profil
+                                                </h3>
+                                            </div>
 
                                         <div className="flex flex-col items-center text-center space-y-4">
                                             <div className="relative group">
@@ -587,58 +802,99 @@ export default function PengaturanAkun({
                                                 )}
                                             </div>
                                         </div>
+                                    </div>
 
-                                        {/* Google Connection Status */}
-                                        <div className="pt-4 border-t border-outline-variant/60">
-                                            <div className="flex items-center justify-between p-3 rounded-xl bg-surface-container-low border border-outline-variant">
-                                                <div className="flex items-center gap-2.5">
-                                                    <svg className="w-5 h-5" viewBox="0 0 24 24">
-                                                        <path
-                                                            fill="#4285F4"
-                                                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                                                        />
-                                                        <path
-                                                            fill="#34A853"
-                                                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                                                        />
-                                                        <path
-                                                            fill="#FBBC05"
-                                                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                                                        />
-                                                        <path
-                                                            fill="#EA4335"
-                                                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                                                        />
-                                                    </svg>
-                                                    <div>
-                                                        <p className="text-xs font-bold text-on-surface">Akun Google</p>
-                                                        <p className="text-[10px] text-outline">
-                                                            {initialUser?.google_id ? "Terkoneksi OAuth" : "Belum Terhubung"}
-                                                        </p>
+                                    {/* Google Connection Status */}
+                                    <div className="pt-4 border-t border-outline-variant/60 mt-auto">
+                                            <div className="flex flex-col gap-2.5 p-3.5 rounded-xl bg-surface-container-low border border-outline-variant">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2.5">
+                                                        <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                                                            <path
+                                                                fill="#4285F4"
+                                                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                                            />
+                                                            <path
+                                                                fill="#34A853"
+                                                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                                            />
+                                                            <path
+                                                                fill="#FBBC05"
+                                                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                                                            />
+                                                            <path
+                                                                fill="#EA4335"
+                                                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                                                            />
+                                                        </svg>
+                                                        <div className="min-w-0 max-w-[150px] sm:max-w-[180px]">
+                                                            <p className="text-xs font-bold text-on-surface">Akun Google</p>
+                                                            <p className="text-[10px] text-outline truncate" title={initialUser?.google_email || initialUser?.email}>
+                                                                {initialUser?.google_id ? (initialUser?.google_email || initialUser?.email || "Terkoneksi OAuth 2.0") : "Belum Terhubung"}
+                                                            </p>
+                                                        </div>
                                                     </div>
+                                                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                                                        initialUser?.google_id
+                                                            ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                                                            : "bg-slate-100 text-slate-600 border border-slate-200"
+                                                    }`}>
+                                                        {initialUser?.google_id ? "Terhubung" : "Belum Terhubung"}
+                                                    </span>
                                                 </div>
-                                                <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                                                    initialUser?.google_id
-                                                        ? "bg-emerald-100 text-emerald-700"
-                                                        : "bg-slate-100 text-slate-600"
-                                                }`}>
-                                                    {initialUser?.google_id ? "Terhubung" : "Lokal"}
-                                                </span>
+
+                                                {/* Tombol Aksi Bind / Ganti / Putuskan Google */}
+                                                <div className="pt-2 border-t border-outline-variant/40 flex items-center gap-2">
+                                                    {initialUser?.google_id ? (
+                                                        <>
+                                                            <a
+                                                                href="/auth/google?action=bind"
+                                                                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-outline-variant rounded-lg text-xs font-semibold text-on-surface hover:text-primary transition shadow-2xs cursor-pointer"
+                                                                title="Pilih akun Google lain untuk dihubungkan"
+                                                            >
+                                                                <span className="material-symbols-outlined text-[16px] text-primary">sync</span>
+                                                                <span>Ganti Akun Google</span>
+                                                            </a>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setShowGoogleDisconnectModal(true)}
+                                                                className="px-2.5 py-1.5 bg-white hover:bg-red-50 border border-red-200 text-red-600 hover:text-red-700 rounded-lg text-xs font-semibold transition shadow-2xs cursor-pointer"
+                                                                title="Putuskan tautan akun Google"
+                                                            >
+                                                                <span className="material-symbols-outlined text-[16px]">link_off</span>
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <a
+                                                            href="/auth/google?action=bind"
+                                                            className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 bg-white hover:bg-blue-50/60 border border-[#4285F4]/40 hover:border-[#4285F4] rounded-xl text-xs font-bold text-[#1a73e8] transition shadow-2xs cursor-pointer"
+                                                        >
+                                                            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                                                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                                                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                                                            </svg>
+                                                            <span>Pilih &amp; Hubungkan Akun Google</span>
+                                                        </a>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Right Column: Profile Form Fields */}
-                                    <div className="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-xs space-y-5">
-                                        <div className="flex items-center justify-between pb-3 border-b border-outline-variant/60">
-                                            <div className="flex items-center gap-2">
-                                                <span className="material-symbols-outlined text-primary text-[20px]">badge</span>
-                                                <h3 className="font-headline-sm text-base font-bold text-on-surface">
-                                                    Informasi Biodata Pribadi
-                                                </h3>
+                                    <div className="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-xs flex flex-col justify-between h-full">
+                                        <div className="space-y-5">
+                                            <div className="flex items-center justify-between pb-3 border-b border-outline-variant/60">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="material-symbols-outlined text-primary text-[20px]">badge</span>
+                                                    <h3 className="font-headline-sm text-base font-bold text-on-surface">
+                                                        Informasi Biodata Pribadi
+                                                    </h3>
+                                                </div>
+                                                <span className="text-xs text-outline italic">* Wajib diisi</span>
                                             </div>
-                                            <span className="text-xs text-outline italic">* Wajib diisi</span>
-                                        </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {/* Nama Lengkap */}
@@ -787,21 +1043,22 @@ export default function PengaturanAkun({
                                                 )}
                                             </div>
                                         </div>
-
-                                        {/* Footer Action */}
-                                        <div className="pt-4 border-t border-outline-variant/60 flex items-center justify-end gap-3">
-                                            <button
-                                                type="submit"
-                                                disabled={isSavingProfile}
-                                                className="h-11 px-6 bg-gradient-to-r from-primary to-indigo-600 text-white rounded-xl font-label-md text-sm font-bold hover:opacity-95 transition-all shadow-md shadow-primary/25 disabled:opacity-50 flex items-center gap-2 cursor-pointer"
-                                            >
-                                                <span className="material-symbols-outlined text-[18px]">
-                                                    {isSavingProfile ? "sync" : "save"}
-                                                </span>
-                                                <span>{isSavingProfile ? "Menyimpan..." : "Simpan Perubahan Profil"}</span>
-                                            </button>
-                                        </div>
                                     </div>
+
+                                    {/* Footer Action */}
+                                    <div className="pt-4 border-t border-outline-variant/60 flex items-center justify-end gap-3 mt-auto">
+                                        <button
+                                            type="submit"
+                                            disabled={isSavingProfile}
+                                            className="h-11 px-6 bg-gradient-to-r from-primary to-indigo-600 text-white rounded-xl font-label-md text-sm font-bold hover:opacity-95 transition-all shadow-md shadow-primary/25 disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                                        >
+                                            <span className="material-symbols-outlined text-[18px]">
+                                                {isSavingProfile ? "sync" : "save"}
+                                            </span>
+                                            <span>{isSavingProfile ? "Menyimpan..." : "Simpan Perubahan Profil"}</span>
+                                        </button>
+                                    </div>
+                                </div>
                                 </div>
                             </form>
                         )}
@@ -1167,12 +1424,7 @@ export default function PengaturanAkun({
                                                 <div className="grid grid-cols-3 gap-2.5">
                                                     <button
                                                         type="button"
-                                                        onClick={() =>
-                                                            setPrefs({
-                                                                ...prefs,
-                                                                interface: { ...prefs.interface, theme: "light" },
-                                                            })
-                                                        }
+                                                        onClick={() => handleThemeChange("light")}
                                                         className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
                                                             prefs.interface.theme === "light"
                                                                 ? "border-primary bg-primary/10 text-primary font-bold shadow-xs"
@@ -1185,12 +1437,7 @@ export default function PengaturanAkun({
 
                                                     <button
                                                         type="button"
-                                                        onClick={() =>
-                                                            setPrefs({
-                                                                ...prefs,
-                                                                interface: { ...prefs.interface, theme: "dark" },
-                                                            })
-                                                        }
+                                                        onClick={() => handleThemeChange("dark")}
                                                         className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
                                                             prefs.interface.theme === "dark"
                                                                 ? "border-primary bg-primary/10 text-primary font-bold shadow-xs"
@@ -1203,12 +1450,7 @@ export default function PengaturanAkun({
 
                                                     <button
                                                         type="button"
-                                                        onClick={() =>
-                                                            setPrefs({
-                                                                ...prefs,
-                                                                interface: { ...prefs.interface, theme: "system" },
-                                                            })
-                                                        }
+                                                        onClick={() => handleThemeChange("system")}
                                                         className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
                                                             prefs.interface.theme === "system"
                                                                 ? "border-primary bg-primary/10 text-primary font-bold shadow-xs"
@@ -1234,15 +1476,7 @@ export default function PengaturanAkun({
                                                 <input
                                                     type="checkbox"
                                                     checked={prefs.interface.compact_tables}
-                                                    onChange={(e) =>
-                                                        setPrefs({
-                                                            ...prefs,
-                                                            interface: {
-                                                                ...prefs.interface,
-                                                                compact_tables: e.target.checked,
-                                                            },
-                                                        })
-                                                    }
+                                                    onChange={(e) => handleCompactToggle(e.target.checked)}
                                                     className="w-5 h-5 rounded text-primary focus:ring-primary border-outline-variant shrink-0 mt-0.5"
                                                 />
                                             </label>
@@ -1316,14 +1550,26 @@ export default function PengaturanAkun({
 
                                 {/* Active Sessions List */}
                                 <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-xs space-y-4">
-                                    <div className="flex items-center justify-between pb-3 border-b border-outline-variant/60">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-outline-variant/60 gap-2">
                                         <div className="flex items-center gap-2">
                                             <span className="material-symbols-outlined text-primary text-[20px]">devices</span>
                                             <h3 className="font-headline-sm text-base font-bold text-on-surface">
                                                 Perangkat &amp; Sesi Aktif ({sessions.length})
                                             </h3>
                                         </div>
-                                        <span className="text-xs text-outline">Pemberitahuan audit keamanan</span>
+                                        <div className="flex items-center gap-2.5">
+                                            {sessions.some((s) => !s.is_current && s.id !== "current") && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setSessionToDelete("all_others")}
+                                                    className="px-3 py-1.5 rounded-xl bg-error-container/20 hover:bg-error-container/40 text-error font-label-md text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                                                >
+                                                    <span className="material-symbols-outlined text-[16px]">phonelink_erase</span>
+                                                    <span>Putuskan Sesi Lainnya</span>
+                                                </button>
+                                            )}
+                                            <span className="text-xs text-outline">Pemberitahuan audit keamanan</span>
+                                        </div>
                                     </div>
 
                                     <div className="space-y-3">
@@ -1363,9 +1609,20 @@ export default function PengaturanAkun({
                                                     <button
                                                         type="button"
                                                         onClick={() => setSessionToDelete(sess.id)}
-                                                        className="px-3.5 py-1.5 rounded-lg border border-outline-variant bg-surface hover:bg-error-container/20 hover:text-error text-xs font-semibold text-outline transition-all cursor-pointer shrink-0 self-start sm:self-auto"
+                                                        disabled={isDeletingSession && sessionToDelete === sess.id}
+                                                        className="px-3.5 py-1.5 rounded-lg border border-outline-variant bg-surface hover:bg-error-container/20 hover:text-error text-xs font-semibold text-outline transition-all cursor-pointer shrink-0 self-start sm:self-auto flex items-center gap-1.5 disabled:opacity-50"
                                                     >
-                                                        Putuskan Sesi
+                                                        {isDeletingSession && sessionToDelete === sess.id ? (
+                                                            <>
+                                                                <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
+                                                                <span>Memutuskan...</span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <span className="material-symbols-outlined text-[16px]">link_off</span>
+                                                                <span>Putuskan Sesi</span>
+                                                            </>
+                                                        )}
                                                     </button>
                                                 )}
                                             </div>
@@ -1397,13 +1654,31 @@ export default function PengaturanAkun({
                 isOpen={Boolean(sessionToDelete)}
                 onClose={() => setSessionToDelete(null)}
                 onConfirm={confirmDestroySession}
-                title="Putuskan Sesi Perangkat?"
-                message="Apakah Anda yakin ingin memutuskan sesi perangkat ini? Pengguna pada perangkat tersebut akan otomatis dikeluarkan dari sistem."
-                confirmText="Ya, Putuskan Sesi"
+                title={sessionToDelete === "all_others" ? "Putuskan Semua Sesi Lain?" : "Putuskan Sesi Perangkat?"}
+                message={
+                    sessionToDelete === "all_others"
+                        ? "Apakah Anda yakin ingin memutuskan seluruh sesi perangkat lain? Akun Anda di seluruh peramban/perangkat lain akan otomatis dikeluarkan."
+                        : "Apakah Anda yakin ingin memutuskan sesi perangkat ini? Pengguna pada perangkat tersebut akan otomatis dikeluarkan dari sistem."
+                }
+                confirmText={sessionToDelete === "all_others" ? "Ya, Putuskan Semua" : "Ya, Putuskan Sesi"}
                 cancelText="Batal"
                 variant="danger"
                 icon="phonelink_erase"
                 isLoading={isDeletingSession}
+            />
+
+            {/* Modal Konfirmasi Putuskan Tautan Google */}
+            <ConfirmModal
+                isOpen={showGoogleDisconnectModal}
+                onClose={() => setShowGoogleDisconnectModal(false)}
+                onConfirm={confirmDisconnectGoogle}
+                title="Putuskan Tautan Akun Google?"
+                message="Apakah Anda yakin ingin memutuskan tautan akun Google dari profil ini? Anda nantinya akan masuk menggunakan kredensial email & kata sandi lokal akun Anda."
+                confirmText="Ya, Putuskan Tautan"
+                cancelText="Batal"
+                variant="danger"
+                icon="link_off"
+                isLoading={isDisconnectingGoogle}
             />
         </>
     );

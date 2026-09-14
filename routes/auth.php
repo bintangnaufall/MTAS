@@ -14,14 +14,14 @@ Route::middleware('guest')->group(function () {
 
     Route::post('admin/login', [AuthenticatedSessionController::class, 'store'])
         ->name('login.post');
-
-    // Google OAuth Routes
-    Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])
-        ->name('auth.google');
-
-    Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])
-        ->name('auth.google.callback');
 });
+
+// Google OAuth Routes (Dapat diakses saat guest untuk login maupun auth untuk bind akun)
+Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])
+    ->name('auth.google');
+
+Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])
+    ->name('auth.google.callback');
 
 Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])

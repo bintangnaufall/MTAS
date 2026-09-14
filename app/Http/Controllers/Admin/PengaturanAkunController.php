@@ -128,6 +128,7 @@ class PengaturanAkunController extends Controller
                 'initials' => $user->initials,
                 'email_verified_at' => $user->email_verified_at?->toIso8601String(),
                 'google_id' => $user->google_id,
+                'google_email' => $user->preferences['google_email'] ?? ($user->google_id ? $user->email : null),
                 'last_login_at' => $user->last_login_at?->toIso8601String(),
                 'last_login_ip' => $user->last_login_ip ?: $request->ip(),
                 'created_at' => $user->created_at?->toIso8601String(),
@@ -136,6 +137,7 @@ class PengaturanAkunController extends Controller
             'roleInfo' => $currentRoleInfo,
             'sessions' => $sessions,
             'preferences' => $userPreferences,
+            'activeTab' => $request->query('tab', 'profil'),
             'auth' => [
                 'user' => $user,
             ],
@@ -279,7 +281,15 @@ class PengaturanAkunController extends Controller
         $user->preferences = $mergedPrefs;
         $user->save();
 
-        return redirect()->back()->with('success', 'Preferensi akun berhasil disimpan!');
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Preferensi antarmuka berhasil disimpan.',
+                'preferences' => $user->preferences,
+            ]);
+        }
+
+        return redirect()->route('admin.pengaturan-akun', ['tab' => 'preferensi'])->with('success', 'Preferensi akun berhasil disimpan!');
     }
 
     /**
@@ -300,25 +310,50 @@ class PengaturanAkunController extends Controller
         $user->avatar = null;
         $user->save();
 
-        return redirect()->back()->with('success', 'Foto profil berhasil dihapus. Inisial akun kini digunakan.');
+        return redirect()->route('admin.pengaturan-akun', ['tab' => 'profil'])->with('success', 'Foto profil berhasil dihapus. Inisial akun kini digunakan.');
     }
 
     /**
-     * Hapus sesi perangkat tertentu.
+     * Hapus sesi perangkat tertentu atau seluruh sesi lainnya.
      */
-    public function destroySession(Request $request, $sessionId)
+    public function destroySession(Request $request, $id = null)
     {
         /** @var User $user */
         $user = $request->user();
+        $targetSessionId = $id ?: $request->route('id') ?: $request->route('sessionId') ?: $request->input('id');
+
+        if (!$targetSessionId) {
+            return redirect()->route('admin.pengaturan-akun', ['tab' => 'sesi'])->withErrors([
+                'session' => 'ID sesi perangkat tidak valid atau tidak ditemukan.',
+            ])->with('error', 'Gagal: ID sesi perangkat tidak valid.');
+        }
+
+        $currentSessionId = $request->session()->getId();
+
+        // Cegah pengguna memutuskan sesi yang sedang aktif digunakan sekarang
+        if ($targetSessionId === $currentSessionId) {
+            return redirect()->route('admin.pengaturan-akun', ['tab' => 'sesi'])->withErrors([
+                'session' => 'Anda tidak dapat memutuskan sesi perangkat yang sedang aktif Anda gunakan saat ini.',
+            ])->with('error', 'Tidak dapat memutuskan sesi aktif saat ini.');
+        }
 
         if (Schema::hasTable('sessions')) {
+            if ($targetSessionId === 'all_others') {
+                DB::table('sessions')
+                    ->where('user_id', $user->id)
+                    ->where('id', '!=', $currentSessionId)
+                    ->delete();
+
+                return redirect()->route('admin.pengaturan-akun', ['tab' => 'sesi'])->with('success', 'Semua sesi perangkat lain berhasil dinonaktifkan.');
+            }
+
             DB::table('sessions')
                 ->where('user_id', $user->id)
-                ->where('id', $sessionId)
+                ->where('id', $targetSessionId)
                 ->delete();
         }
 
-        return redirect()->back()->with('success', 'Sesi perangkat berhasil dinonaktifkan.');
+        return redirect()->route('admin.pengaturan-akun', ['tab' => 'sesi'])->with('success', 'Sesi perangkat berhasil diputuskan.');
     }
 
     /**
